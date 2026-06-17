@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CPI Pharmacology Trainer</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #020617);
+    }
+    
+    .font-display {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Glassmorphism custom styles */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+      background: rgba(30, 41, 59, 0.65);
+      border-color: rgba(99, 102, 241, 0.25);
+      transform: translateY(-2px);
+    }
+
+    /* Flashcard 3D flip effect */
+    .card-container {
+      perspective: 1200px;
+    }
+
+    .flashcard {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .flashcard.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+    }
+
+    .card-front {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+      transform: rotateY(180deg);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.3);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.3);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.5);
+    }
+  </style>
+</head>
+<body class="h-full text-slate-100 overflow-hidden">
+  
+  <div class="flex h-full overflow-hidden">
+    
+    <!-- SIDEBAR -->
+    <aside class="w-72 glass-panel flex-shrink-0 flex flex-col border-r border-slate-800 z-10">
+      <!-- App Brand -->
+      <div class="p-6 border-b border-slate-800/60 flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i class="fa-solid fa-atom text-white text-xl animate-spin-slow"></i>
+        </div>
+        <div>
+          <h1 class="font-display font-bold text-lg leading-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            CPI Molecules
+          </h1>
+          <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Pharmacologie PVA</p>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 bg-indigo-600/10 text-indigo-400 border border-indigo-500/20">
+          <i class="fa-solid fa-house-chimney text-base"></i>
+          Tableau de bord
+        </button>
+
+        <button onclick="switchTab('flashcards')" id="nav-flashcards" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent">
+          <i class="fa-solid fa-clone text-base"></i>
+          Fiches de révision
+        </button>
+
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent">
+          <i class="fa-solid fa-circle-question text-base"></i>
+          Quiz Entraînement
+        </button>
+
+        <button onclick="switchTab('tablegame')" id="nav-tablegame" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent">
+          <i class="fa-solid fa-table-cells text-base"></i>
+          Tableau à compléter
+        </button>
+
+        <button onclick="switchTab('searchsheet')" id="nav-searchsheet" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent">
+          <i class="fa-solid fa-magnifying-glass text-base"></i>
+          Recherche & Fiches
+        </button>
+      </nav>
+
+      <!-- Global Progression Widget -->
+      <div class="p-6 border-t border-slate-800/60 bg-slate-900/30">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-slate-400">Progression globale</span>
+          <span id="global-progress-txt" class="text-xs font-bold text-indigo-400">0%</span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-2">
+          <div id="global-progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-[11px] text-slate-500">
+          <span>Éléments maîtrisés :</span>
+          <span id="mastered-count" class="font-semibold text-slate-300">0 / 0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN APP CONTENT AREA -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+      
+      <!-- HEADER -->
+      <header class="h-20 border-b border-slate-800/60 flex items-center justify-between px-8 z-10 glass-panel">
+        <div class="flex items-center gap-4">
+          <h2 id="current-view-title" class="font-display font-bold text-2xl text-slate-100">Tableau de bord</h2>
+        </div>
+        
+        <!-- User streak & stats in header -->
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-sm font-medium">
+            <i class="fa-solid fa-fire text-base animate-pulse"></i>
+            <span>Série : </span>
+            <span id="streak-count" class="font-bold">0</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-400">
+            <i class="fa-solid fa-award text-indigo-400 text-lg"></i>
+            <span>Score Moyen Quiz : </span>
+            <span id="avg-quiz-score" class="font-bold text-indigo-300">--%</span>
+          </div>
+          <button onclick="resetAllProgress()" class="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate-left"></i>
+            Réinitialiser
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW PANELS CONTAINER -->
+      <div class="flex-1 overflow-y-auto p-8 relative">
+
+        <!-- TAB: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-view space-y-8">
+          <!-- Welcome Box -->
+          <div class="p-8 rounded-3xl bg-gradient-to-r from-indigo-900/60 via-purple-900/30 to-slate-900/50 border border-indigo-500/20 relative overflow-hidden">
+            <div class="relative z-10 max-w-xl">
+              <h3 class="font-display font-bold text-3xl mb-2 text-white">Prêt pour votre examen CPI ?</h3>
+              <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                Cette plateforme interactive contient <strong>100% des données</strong> de vos fiches de cours. Utilisez les différents modes d'apprentissage actif pour mémoriser les formules, mécanismes d'action, indications et effets indésirables des cations, anions et chélateurs.
+              </p>
+              <div class="flex gap-4">
+                <button onclick="switchTab('tablegame')" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/30">
+                  <i class="fa-solid fa-table-cells mr-2"></i> Remplir le Tableau (Format Examen)
+                </button>
+                <button onclick="switchTab('quiz')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition-all border border-slate-700">
+                  <i class="fa-solid fa-circle-question mr-2"></i> Lancer un Quiz Rapide
+                </button>
+              </div>
+            </div>
+            <!-- Decors -->
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-[200px] pointer-events-none">
+              <i class="fa-solid fa-vial-virus"></i>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="p-6 rounded-2xl glass-card flex items-center gap-5">
+              <div class="p-4 rounded-xl bg-purple-500/10 text-purple-400">
+                <i class="fa-solid fa-flask text-2xl"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Cations étudiés</p>
+                <h4 id="stat-cations" class="font-display font-bold text-2xl mt-0.5">0 / 0</h4>
+              </div>
+            </div>
+            <div class="p-6 rounded-2xl glass-card flex items-center gap-5">
+              <div class="p-4 rounded-xl bg-teal-500/10 text-teal-400">
+                <i class="fa-solid fa-droplet text-2xl"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Anions étudiés</p>
+                <h4 id="stat-anions" class="font-display font-bold text-2xl mt-0.5">0 / 0</h4>
+              </div>
+            </div>
+            <div class="p-6 rounded-2xl glass-card flex items-center gap-5">
+              <div class="p-4 rounded-xl bg-amber-500/10 text-amber-400">
+                <i class="fa-solid fa-hands-holding text-2xl"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Chélateurs étudiés</p>
+                <h4 id="stat-chelateurs" class="font-display font-bold text-2xl mt-0.5">0 / 0</h4>
+              </div>
+            </div>
+            <div class="p-6 rounded-2xl glass-card flex items-center gap-5">
+              <div class="p-4 rounded-xl bg-rose-500/10 text-rose-400">
+                <i class="fa-solid fa-trophy text-2xl"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Maîtrise totale</p>
+                <h4 id="stat-total" class="font-display font-bold text-2xl mt-0.5">0%</h4>
+              </div>
+            </div>
+          </div>
+
+          <!-- Study Modules Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left: Quick revision list -->
+            <div class="p-6 rounded-2xl glass-panel flex flex-col">
+              <h3 class="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list text-indigo-400"></i>
+                Éléments à réviser en priorité
+              </h3>
+              <div id="priority-revision-list" class="space-y-3 flex-1 overflow-y-auto max-h-80 pr-2">
+                <!-- Dynamic priority molecules -->
+              </div>
+            </div>
+
+            <!-- Right: Tip box or exam checklist -->
+            <div class="p-6 rounded-2xl glass-panel space-y-4">
+              <h3 class="font-display font-bold text-lg flex items-center gap-2">
+                <i class="fa-solid fa-bullseye text-pink-400"></i>
+                Checklist d'Examen CPI
+              </h3>
+              <div class="space-y-3">
+                <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-800/30 border border-slate-700/50 cursor-pointer">
+                  <input type="checkbox" checked disabled class="mt-1 rounded border-slate-600 text-indigo-600 bg-slate-900 focus:ring-indigo-500">
+                  <div class="text-xs text-slate-300">
+                    <span class="font-semibold text-slate-200">Base de données complète intégrée</span>
+                    <p class="text-slate-400 mt-0.5">39 molécules pharmacologiques et concepts généraux importés.</p>
+                  </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-800/30 border border-slate-700/50 cursor-pointer">
+                  <input type="checkbox" id="check-flash" onclick="updateChecklist()" class="mt-1 rounded border-slate-600 text-indigo-600 bg-slate-900 focus:ring-indigo-500">
+                  <div class="text-xs text-slate-300">
+                    <span class="font-semibold text-slate-200">Parcourir toutes les fiches actives</span>
+                    <p class="text-slate-400 mt-0.5">Faire défiler les fiches mémos pour l'auto-évaluation active recall.</p>
+                  </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-800/30 border border-slate-700/50 cursor-pointer">
+                  <input type="checkbox" id="check-quiz" onclick="updateChecklist()" class="mt-1 rounded border-slate-600 text-indigo-600 bg-slate-900 focus:ring-indigo-500">
+                  <div class="text-xs text-slate-300">
+                    <span class="font-semibold text-slate-200">Obtenir au moins 80% à un Quiz</span>
+                    <p class="text-slate-400 mt-0.5">Tester vos connaissances aléatoires sur les doses et indications.</p>
+                  </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-800/30 border border-slate-700/50 cursor-pointer">
+                  <input type="checkbox" id="check-table" onclick="updateChecklist()" class="mt-1 rounded border-slate-600 text-indigo-600 bg-slate-900 focus:ring-indigo-500">
+                  <div class="text-xs text-slate-300">
+                    <span class="font-semibold text-slate-200">Compléter une grille d'examen</span>
+                    <p class="text-slate-400 mt-0.5">Remplir avec succès une colonne complète (ex : les effets indésirables).</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: FLASHCARDS -->
+        <section id="tab-flashcards" class="tab-view space-y-8 hidden">
+          <!-- Controls -->
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex gap-2">
+              <button onclick="filterFlashcards('all')" id="fc-filter-all" class="fc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition-all">Tous</button>
+              <button onclick="filterFlashcards('Cation')" id="fc-filter-Cation" class="fc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200 transition-all">Cations</button>
+              <button onclick="filterFlashcards('Anion')" id="fc-filter-Anion" class="fc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200 transition-all">Anions</button>
+              <button onclick="filterFlashcards('Chélateur')" id="fc-filter-Chélateur" class="fc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200 transition-all">Chélateurs</button>
+            </div>
+            <div class="text-sm text-slate-400 font-medium">
+              Fiche <span id="fc-index" class="text-indigo-400 font-bold">1</span> / <span id="fc-total">0</span>
+            </div>
+          </div>
+
+          <!-- Flashcard Deck Area -->
+          <div class="max-w-2xl mx-auto card-container">
+            <div onclick="flipFlashcard()" id="flashcard" class="flashcard cursor-pointer">
+              <!-- FRONT -->
+              <div class="card-face card-front p-8 flex flex-col justify-between items-center text-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.06),transparent_60%)]"></div>
+                <!-- Category Badge -->
+                <div id="fc-badge-front" class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 z-10">
+                  Cation
+                </div>
+                <!-- Element Name -->
+                <div class="my-auto z-10 space-y-4">
+                  <h3 id="fc-name-front" class="font-display font-black text-5xl text-white tracking-tight">Lithium</h3>
+                  <p id="fc-sub-front" class="text-sm text-slate-400 uppercase tracking-widest font-semibold">Groupe I - Alcalins</p>
+                </div>
+                <!-- Action tip -->
+                <div class="text-xs text-slate-500 font-medium z-10">
+                  <i class="fa-solid fa-rotate-left mr-1.5"></i> Cliquer pour retourner la fiche
+                </div>
+              </div>
+              
+              <!-- BACK -->
+              <div class="card-face card-back p-6 flex flex-col justify-between overflow-hidden">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 flex-shrink-0">
+                  <div>
+                    <h4 id="fc-name-back" class="font-display font-bold text-xl text-white">Lithium</h4>
+                    <span id="fc-sub-back" class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Groupe I - Alcalins</span>
+                  </div>
+                  <div id="fc-badge-back" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    Cation
+                  </div>
+                </div>
+
+                <!-- Info Grid (Scrollable) -->
+                <div class="flex-1 overflow-y-auto py-4 space-y-4 text-xs">
+                  <!-- Dose & Forme -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800/40">
+                      <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-0.5">Dose</span>
+                      <p id="fc-dose" class="text-slate-200 font-semibold">400 mg</p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800/40">
+                      <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-0.5">Forme(s) Chimique(s)</span>
+                      <p id="fc-formes" class="text-slate-200 font-semibold">Carbonate de lithium</p>
+                    </div>
+                  </div>
+
+                  <!-- Mécanisme -->
+                  <div>
+                    <span class="text-[10px] text-indigo-400 uppercase tracking-wider font-bold block mb-1">Mécanisme d'action & Effets</span>
+                    <ul id="fc-mecanismes" class="list-disc pl-4 space-y-1 text-slate-300"></ul>
+                  </div>
+
+                  <!-- Indications -->
+                  <div>
+                    <span class="text-[10px] text-emerald-400 uppercase tracking-wider font-bold block mb-1">Indications</span>
+                    <ul id="fc-indications" class="list-disc pl-4 space-y-1 text-slate-300"></ul>
+                  </div>
+
+                  <!-- Effets Indésirables -->
+                  <div>
+                    <span class="text-[10px] text-rose-400 uppercase tracking-wider font-bold block mb-1">Effets Indésirables & Interactions</span>
+                    <ul id="fc-effets" class="list-disc pl-4 space-y-1 text-slate-300"></ul>
+                  </div>
+
+                  <!-- Détails Synthèse supplémentaire -->
+                  <div id="fc-details-box" class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/60">
+                    <span class="text-[10px] text-purple-400 uppercase tracking-wider font-bold block mb-1.5"><i class="fa-solid fa-circle-info mr-1"></i> Fiche de cours complète</span>
+                    <ul id="fc-details" class="list-disc pl-4 space-y-1 text-slate-300"></ul>
+                  </div>
+                </div>
+
+                <!-- Footer controls inside card back -->
+                <div class="border-t border-slate-800/80 pt-3 flex-shrink-0 flex items-center justify-between text-xs text-slate-500">
+                  <span>Cliquer n'importe où pour retourner</span>
+                  <span class="flex items-center gap-1"><i class="fa-solid fa-award text-yellow-500"></i> Auto-évaluation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Navigation & Grading Buttons -->
+          <div class="max-w-xl mx-auto flex flex-col items-center gap-6">
+            <!-- Manual assessment grading -->
+            <div class="flex gap-4 w-full justify-center">
+              <button onclick="gradeFlashcard(false)" class="flex-1 max-w-[160px] px-5 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-semibold text-xs flex items-center justify-center gap-2 transition-all">
+                <i class="fa-solid fa-circle-xmark"></i> À réviser
+              </button>
+              <button onclick="gradeFlashcard(true)" class="flex-1 max-w-[160px] px-5 py-3 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 font-semibold text-xs flex items-center justify-center gap-2 transition-all">
+                <i class="fa-solid fa-circle-check"></i> Maîtrisé
+              </button>
+            </div>
+
+            <!-- Arrow Navigation -->
+            <div class="flex items-center gap-8">
+              <button onclick="prevFlashcard()" class="h-12 w-12 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center border border-slate-700 text-slate-300 transition-colors">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button onclick="nextFlashcard()" class="h-12 w-12 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center border border-slate-700 text-slate-300 transition-colors">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: QUIZ -->
+        <section id="tab-quiz" class="tab-view space-y-8 hidden">
+          <!-- Quiz Setup/Landing -->
+          <div id="quiz-setup" class="max-w-xl mx-auto p-8 rounded-3xl glass-panel space-y-6">
+            <div class="text-center space-y-2">
+              <div class="h-16 w-16 rounded-2xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center mx-auto border border-indigo-500/30">
+                <i class="fa-solid fa-circle-question text-3xl"></i>
+              </div>
+              <h3 class="font-display font-bold text-2xl text-white">Quiz d'évaluation actif</h3>
+              <p class="text-sm text-slate-400">10 questions générées aléatoirement pour tester votre mémoire à long terme.</p>
+            </div>
+
+            <!-- Quiz config options -->
+            <div class="space-y-4 pt-2">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Catégorie cible</label>
+                <select id="quiz-category" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                  <option value="all">Tout le programme</option>
+                  <option value="Cation">Cations uniquement</option>
+                  <option value="Anion">Anions uniquement</option>
+                  <option value="Chélateur">Chélateurs uniquement</option>
+                </select>
+              </div>
+            </div>
+
+            <button onclick="startQuiz()" class="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all shadow-lg shadow-indigo-600/30">
+              Commencer le Quiz
+            </button>
+          </div>
+
+          <!-- Active Quiz Game screen -->
+          <div id="quiz-game" class="max-w-2xl mx-auto glass-panel rounded-3xl p-8 space-y-6 hidden">
+            <!-- Progress -->
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-slate-400 font-medium">Question <span id="quiz-q-num" class="text-indigo-400 font-bold">1</span>/10</span>
+              <span id="quiz-score-live" class="font-bold text-emerald-400">Score: 0</span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800 rounded-full h-1.5">
+              <div id="quiz-progress" class="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+            </div>
+
+            <!-- Question display -->
+            <div class="py-4">
+              <h4 id="quiz-question-text" class="font-display font-semibold text-xl text-slate-100 leading-snug">
+                Chargement de la question...
+              </h4>
+            </div>
+
+            <!-- Options (4 Buttons) -->
+            <div id="quiz-options" class="grid grid-cols-1 gap-3">
+              <!-- Options buttons dynamically rendered -->
+            </div>
+
+            <!-- Next button -->
+            <div class="flex justify-end pt-4">
+              <button onclick="nextQuizQuestion()" id="quiz-next-btn" disabled class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold text-sm transition-all flex items-center gap-2">
+                Suivant <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quiz Results Screen -->
+          <div id="quiz-results" class="max-w-md mx-auto p-8 rounded-3xl glass-panel text-center space-y-6 hidden">
+            <div id="quiz-result-icon" class="h-20 w-20 rounded-full flex items-center justify-center mx-auto text-4xl">
+              <!-- Trophy or check icon -->
+            </div>
+            <div class="space-y-1">
+              <h3 class="font-display font-black text-3xl text-white">Quiz Terminé !</h3>
+              <p id="quiz-result-msg" class="text-sm text-slate-400">Vous avez obtenu un excellent score.</p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-900/50 border border-slate-800/80">
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold mb-1">Votre Score</span>
+              <h4 id="quiz-final-score" class="font-display font-black text-5xl text-indigo-400">8 / 10</h4>
+              <p id="quiz-score-percent" class="text-xs text-indigo-300 font-semibold mt-1">80% de réussite</p>
+            </div>
+
+            <div class="flex gap-4">
+              <button onclick="retryQuiz()" class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all">
+                Recommencer
+              </button>
+              <button onclick="switchTab('dashboard')" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all border border-slate-700">
+                Menu Principal
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: TABLEGAME -->
+        <section id="tab-tablegame" class="tab-view space-y-8 hidden">
+          <!-- Game config -->
+          <div id="tg-setup" class="max-w-xl mx-auto p-8 rounded-3xl glass-panel space-y-6">
+            <div class="text-center space-y-2">
+              <div class="h-16 w-16 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center mx-auto border border-purple-500/30">
+                <i class="fa-solid fa-table-cells text-3xl"></i>
+              </div>
+              <h3 class="font-display font-bold text-2xl text-white">Remplir le Tableau</h3>
+              <p class="text-sm text-slate-400">Défiez-vous en complétant le tableau officiel d'examen avec des cellules masquées.</p>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">1. Filtrer les Éléments</label>
+                <select id="tg-family" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                  <option value="all">Tout le programme</option>
+                  <option value="Cation">Cations uniquement</option>
+                  <option value="Anion">Anions uniquement</option>
+                  <option value="Chélateur">Chélateurs uniquement</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">2. Colonne à masquer (Test)</label>
+                <select id="tg-column" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                  <option value="effets_indesirables">Effets Indésirables</option>
+                  <option value="indications">Indications</option>
+                  <option value="mecanismes">Mécanismes d'action</option>
+                  <option value="formes">Formes Chimiques</option>
+                  <option value="dose">Doses</option>
+                  <option value="random">Aléatoire (Toutes colonnes mélangées)</option>
+                </select>
+              </div>
+            </div>
+
+            <button onclick="startTableGame()" class="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-purple-600/30">
+              Lancer l'exercice
+            </button>
+          </div>
+
+          <!-- Active Game Screen -->
+          <div id="tg-game" class="space-y-4 hidden">
+            <!-- Header bar -->
+            <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl glass-panel">
+              <div class="flex items-center gap-4">
+                <span class="text-sm font-medium text-slate-300">Exercice en cours : <span id="tg-mode-txt" class="font-bold text-purple-400">Effets Indésirables</span></span>
+                <span class="h-4 w-px bg-slate-800"></span>
+                <span class="text-sm font-medium text-slate-300">Complétion : <span id="tg-score-live" class="font-bold text-emerald-400">0 / 0</span></span>
+              </div>
+              <button onclick="quitTableGame()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors border border-slate-700">
+                Quitter l'exercice
+              </button>
+            </div>
+
+            <!-- The Grid Table Wrapper -->
+            <div class="overflow-x-auto rounded-2xl border border-slate-800 glass-panel">
+              <table class="w-full min-w-[1000px] border-collapse text-left text-xs">
+                <thead>
+                  <tr class="bg-slate-900 border-b border-slate-800 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                    <th class="p-4 w-[120px]">Famille</th>
+                    <th class="p-4 w-[120px]">Élément</th>
+                    <th class="p-4 w-[100px]">Dose</th>
+                    <th class="p-4 w-[160px]">Formes Chimiques</th>
+                    <th class="p-4 w-[220px]">Mécanismes / Effets</th>
+                    <th class="p-4 w-[220px]">Indications</th>
+                    <th class="p-4">Effets Indésirables</th>
+                  </tr>
+                </thead>
+                <tbody id="tg-table-body" class="divide-y divide-slate-800/60">
+                  <!-- Row entries will be dynamically rendered here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: SEARCHSHEET -->
+        <section id="tab-searchsheet" class="tab-view space-y-8 hidden">
+          <!-- Filter and Search Header -->
+          <div class="p-6 rounded-2xl glass-panel flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div class="relative w-full md:w-96">
+              <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 text-sm"></i>
+              <input type="text" id="sheet-search" oninput="searchMolecules()" placeholder="Rechercher par élément, indication, effet, etc..." class="w-full bg-slate-900/60 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+            </div>
+            <div class="flex gap-2 w-full md:w-auto overflow-x-auto">
+              <button onclick="filterSearchSheet('all')" id="ss-filter-all" class="ss-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition-all whitespace-nowrap">Tous</button>
+              <button onclick="filterSearchSheet('Cation')" id="ss-filter-Cation" class="ss-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">Cations</button>
+              <button onclick="filterSearchSheet('Anion')" id="ss-filter-Anion" class="ss-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">Anions</button>
+              <button onclick="filterSearchSheet('Chélateur')" id="ss-filter-Chélateur" class="ss-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap">Chélateurs</button>
+            </div>
+          </div>
+
+          <!-- Cards list (Accordion style) -->
+          <div id="search-sheet-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic elements cards -->
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- COMPLETION MODAL/POPUP FOR CELL GUESSING IN TABLE GAME -->
+  <div id="guess-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="w-full max-w-xl glass-panel rounded-3xl p-8 space-y-6 shadow-2xl border border-slate-700/40">
+      <div class="flex justify-between items-start">
+        <div>
+          <span id="modal-subtitle" class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider block">Exercice de validation</span>
+          <h3 id="modal-title" class="font-display font-bold text-xl text-white">Trouver l'élément mystère</h3>
+        </div>
+        <button onclick="closeGuessModal()" class="h-8 w-8 rounded-lg bg-slate-900/60 text-slate-400 hover:text-slate-200 flex items-center justify-center border border-slate-800">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Question Detail -->
+      <div class="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 text-xs text-slate-300">
+        <span id="modal-prompt-label" class="font-semibold text-slate-400 block mb-1">Détail de la cellule :</span>
+        <p id="modal-prompt-desc" class="italic">...</p>
+      </div>
+
+      <!-- Options container -->
+      <div class="space-y-2">
+        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Sélectionnez la bonne réponse :</label>
+        <div id="modal-options" class="grid grid-cols-1 gap-2.5">
+          <!-- Options rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Javascript Logic files -->
+  <script src="data.js"></script>
+  <script>
+    // App State Management
+    let currentTab = 'dashboard';
+    
+    // Flashcard State
+    let flashcardIndex = 0;
+    let filteredFlashcardsList = [];
+    let isFlipped = false;
+    let activeFcCategory = 'all';
+
+    // Quiz State
+    let quizCategory = 'all';
+    let currentQuizQuestions = [];
+    let currentQuizIndex = 0;
+    let quizScore = 0;
+    let selectedAnswerIndex = null;
+
+    // Table Game State
+    let tgCategory = 'all';
+    let tgHiddenColumn = 'effets_indesirables';
+    let tgActiveRows = [];
+    let tgScore = 0;
+    let tgTotal = 0;
+    let activeGuessCell = null; // { rowId, column, originalText, buttonId }
+
+    // Search Sheet State
+    let activeSsCategory = 'all';
+
+    // Local Storage Progress State
+    let masteredElements = {}; // { elementId: boolean }
+    let quizScoresHistory = []; // [ scores ]
+    let streak = 0;
+
+    // Page mapping for Titles
+    const TAB_TITLES = {
+      'dashboard': 'Tableau de bord',
+      'flashcards': 'Fiches de révision',
+      'quiz': "Quiz d'entraînement",
+      'tablegame': 'Tableau à compléter',
+      'searchsheet': 'Recherche & Fiches Complètes'
+    };
+
+    // Initialize the App
+    window.addEventListener('DOMContentLoaded', () => {
+      loadProgress();
+      renderDashboard();
+      initFlashcards();
+      initSearchSheet();
+      updateChecklist();
+    });
+
+    // Tab Navigation
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+      // Update Nav Buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.className = "nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 border border-transparent";
+      });
+
+      const activeBtn = document.getElementById(`nav-${tabName}`);
+      if (activeBtn) {
+        activeBtn.className = "nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 bg-indigo-600/10 text-indigo-400 border border-indigo-500/20";
+      }
+
+      currentTab = tabName;
+      document.getElementById('current-view-title').textContent = TAB_TITLES[tabName];
+
+      // Tab specific initializers
+      if (tabName === 'dashboard') {
+        renderDashboard();
+      } else if (tabName === 'flashcards') {
+        initFlashcards();
+      } else if (tabName === 'searchsheet') {
+        initSearchSheet();
+      }
+    }
+
+    // Progression & localStorage
+    function loadProgress() {
+      const storedMastered = localStorage.getItem('cpi_mastered');
+      if (storedMastered) {
+        masteredElements = JSON.parse(storedMastered);
+      }
+      
+      const storedHistory = localStorage.getItem('cpi_quiz_history');
+      if (storedHistory) {
+        quizScoresHistory = JSON.parse(storedHistory);
+      }
+
+      const storedStreak = localStorage.getItem('cpi_streak');
+      if (storedStreak) {
+        streak = parseInt(storedStreak);
+      }
+      document.getElementById('streak-count').textContent = streak;
+
+      updateGlobalStats();
+    }
+
+    function saveProgress() {
+      localStorage.setItem('cpi_mastered', JSON.stringify(masteredElements));
+      localStorage.setItem('cpi_quiz_history', JSON.stringify(quizScoresHistory));
+      localStorage.setItem('cpi_streak', streak.toString());
+      updateGlobalStats();
+    }
+
+    function resetAllProgress() {
+      if (confirm('Voulez-vous réinitialiser toute votre progression de révision ?')) {
+        masteredElements = {};
+        quizScoresHistory = [];
+        streak = 0;
+        saveProgress();
+        switchTab('dashboard');
+        // Uncheck checklists
+        document.getElementById('check-flash').checked = false;
+        document.getElementById('check-quiz').checked = false;
+        document.getElementById('check-table').checked = false;
+      }
+    }
+
+    function updateGlobalStats() {
+      // Calculate overall stats
+      const totalElements = MOLECULES_DATA.length;
+      let masteredCount = 0;
+      MOLECULES_DATA.forEach(m => {
+        if (masteredElements[m.id]) masteredCount++;
+      });
+
+      document.getElementById('mastered-count').textContent = `${masteredCount} / ${totalElements}`;
+      
+      const progressPercent = totalElements > 0 ? Math.round((masteredCount / totalElements) * 100) : 0;
+      document.getElementById('global-progress-txt').textContent = `${progressPercent}%`;
+      document.getElementById('global-progress-bar').style.width = `${progressPercent}%`;
+
+      // Average Quiz Score
+      if (quizScoresHistory.length > 0) {
+        const sum = quizScoresHistory.reduce((acc, curr) => acc + curr, 0);
+        const avg = Math.round(sum / quizScoresHistory.length);
+        document.getElementById('avg-quiz-score').textContent = `${avg}%`;
+      } else {
+        document.getElementById('avg-quiz-score').textContent = `--%`;
+      }
+
+      // Update Dashboard stats cards
+      const countByCat = { 'Cation': 0, 'Anion': 0, 'Chélateur': 0 };
+      const masteredByCat = { 'Cation': 0, 'Anion': 0, 'Chélateur': 0 };
+
+      MOLECULES_DATA.forEach(m => {
+        if (countByCat[m.categorie] !== undefined) {
+          countByCat[m.categorie]++;
+          if (masteredElements[m.id]) masteredByCat[m.categorie]++;
+        }
+      });
+
+      document.getElementById('stat-cations').textContent = `${masteredByCat['Cation']} / ${countByCat['Cation']}`;
+      document.getElementById('stat-anions').textContent = `${masteredByCat['Anion']} / ${countByCat['Anion']}`;
+      document.getElementById('stat-chelateurs').textContent = `${masteredByCat['Chélateur']} / ${countByCat['Chélateur']}`;
+      document.getElementById('stat-total').textContent = `${progressPercent}%`;
+    }
+
+    // Dashboard Render
+    function renderDashboard() {
+      // Load priority elements (elements that are not mastered yet)
+      const unmastered = MOLECULES_DATA.filter(m => !masteredElements[m.id] && m.categorie !== 'Concepts');
+      const listContainer = document.getElementById('priority-revision-list');
+      listContainer.innerHTML = '';
+
+      if (unmastered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-8 text-center text-slate-500 text-xs">
+            <i class="fa-solid fa-circle-check text-2xl text-emerald-500 mb-2 block"></i>
+            Félicitations ! Vous maîtrisez toutes les molécules de la synthèse !
+          </div>
+        `;
+      } else {
+        // Show up to 5 elements
+        unmastered.slice(0, 5).forEach(m => {
+          let badgeColor = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+          if (m.categorie === 'Anion') badgeColor = 'bg-teal-500/10 text-teal-400 border-teal-500/20';
+          if (m.categorie === 'Chélateur') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+
+          const item = document.createElement('div');
+          item.className = "p-3 rounded-xl bg-slate-900/40 border border-slate-800/80 flex items-center justify-between text-xs";
+          item.innerHTML = `
+            <div>
+              <span class="font-bold text-slate-200">${m.element}</span>
+              <p class="text-[10px] text-slate-400 mt-0.5">${m.sous_categorie}</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase border ${badgeColor}">${m.categorie}</span>
+              <button onclick="studyMoleculesSpecific('${m.id}')" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                Étudier <i class="fa-solid fa-angle-right"></i>
+              </button>
+            </div>
+          `;
+          listContainer.appendChild(item);
+        });
+      }
+    }
+
+    function studyMoleculesSpecific(moleculeId) {
+      const idx = MOLECULES_DATA.findIndex(m => m.id === moleculeId);
+      if (idx !== -1) {
+        activeFcCategory = 'all';
+        filteredFlashcardsList = [...MOLECULES_DATA];
+        flashcardIndex = idx;
+        switchTab('flashcards');
+        renderFlashcard();
+      }
+    }
+
+    function updateChecklist() {
+      // Check if task are checked in local storage
+      const ch1 = document.getElementById('check-flash').checked;
+      const ch2 = document.getElementById('check-quiz').checked;
+      const ch3 = document.getElementById('check-table').checked;
+      
+      localStorage.setItem('cpi_check_flash', ch1);
+      localStorage.setItem('cpi_check_quiz', ch2);
+      localStorage.setItem('cpi_check_table', ch3);
+    }
+
+    // FLASHCARDS LOGIC
+    function initFlashcards() {
+      filteredFlashcardsList = MOLECULES_DATA.filter(m => activeFcCategory === 'all' || m.categorie === activeFcCategory);
+      if (flashcardIndex >= filteredFlashcardsList.length) {
+        flashcardIndex = 0;
+      }
+      document.getElementById('fc-total').textContent = filteredFlashcardsList.length;
+      isFlipped = false;
+      document.getElementById('flashcard').classList.remove('is-flipped');
+      renderFlashcard();
+    }
+
+    function filterFlashcards(cat) {
+      activeFcCategory = cat;
+      document.querySelectorAll('.fc-filter-btn').forEach(btn => {
+        btn.className = "fc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200 transition-all";
+      });
+      document.getElementById(`fc-filter-${cat}`).className = "fc-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition-all";
+      
+      flashcardIndex = 0;
+      initFlashcards();
+    }
+
+    function renderFlashcard() {
+      if (filteredFlashcardsList.length === 0) return;
+      const m = filteredFlashcardsList[flashcardIndex];
+
+      document.getElementById('fc-index').textContent = flashcardIndex + 1;
+
+      // Badges
+      let badgeHtml = m.categorie;
+      let badgeClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+      if (m.categorie === 'Anion') badgeClass = 'bg-teal-500/10 text-teal-400 border-teal-500/20';
+      if (m.categorie === 'Chélateur') badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      if (m.categorie === 'Concepts') badgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+
+      // FRONT
+      const badgeFront = document.getElementById('fc-badge-front');
+      badgeFront.textContent = m.categorie;
+      badgeFront.className = `px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border z-10 ${badgeClass}`;
+
+      document.getElementById('fc-name-front').textContent = m.element;
+      document.getElementById('fc-sub-front').textContent = m.sous_categorie;
+
+      // BACK
+      const badgeBack = document.getElementById('fc-badge-back');
+      badgeBack.textContent = m.categorie;
+      badgeBack.className = `px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${badgeClass}`;
+
+      document.getElementById('fc-name-back').textContent = m.element;
+      document.getElementById('fc-sub-back').textContent = m.sous_categorie;
+      document.getElementById('fc-dose').textContent = m.dose;
+      document.getElementById('fc-formes').textContent = m.formes;
+
+      // Bullet points
+      renderList('fc-mecanismes', m.mecanismes);
+      renderList('fc-indications', m.indications);
+      renderList('fc-effets', m.effets_indesirables);
+      
+      // Synthesis specific bullet points
+      if (m.details_synthese && m.details_synthese.length > 0) {
+        document.getElementById('fc-details-box').classList.remove('hidden');
+        renderList('fc-details', m.details_synthese);
+      } else {
+        document.getElementById('fc-details-box').classList.add('hidden');
+      }
+    }
+
+    function renderList(elemId, list) {
+      const container = document.getElementById(elemId);
+      container.innerHTML = '';
+      if (!list || list.length === 0) {
+        container.innerHTML = `<li class="text-slate-500 italic">Aucune donnée spécifique.</li>`;
+        return;
+      }
+      list.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        container.appendChild(li);
+      });
+    }
+
+    function flipFlashcard() {
+      isFlipped = !isFlipped;
+      const card = document.getElementById('flashcard');
+      if (isFlipped) {
+        card.classList.add('is-flipped');
+      } else {
+        card.classList.remove('is-flipped');
+      }
+    }
+
+    function prevFlashcard() {
+      if (filteredFlashcardsList.length === 0) return;
+      flashcardIndex = (flashcardIndex - 1 + filteredFlashcardsList.length) % filteredFlashcardsList.length;
+      isFlipped = false;
+      document.getElementById('flashcard').classList.remove('is-flipped');
+      setTimeout(renderFlashcard, 150); // wait transition half time
+    }
+
+    function nextFlashcard() {
+      if (filteredFlashcardsList.length === 0) return;
+      flashcardIndex = (flashcardIndex + 1) % filteredFlashcardsList.length;
+      isFlipped = false;
+      document.getElementById('flashcard').classList.remove('is-flipped');
+      setTimeout(renderFlashcard, 150);
+    }
+
+    function gradeFlashcard(knows) {
+      const m = filteredFlashcardsList[flashcardIndex];
+      masteredElements[m.id] = knows;
+      saveProgress();
+
+      // Mini micro-animation
+      const activeBtn = document.getElementById('check-flash');
+      if (activeBtn) activeBtn.checked = true;
+
+      // Toast indicator or color flash
+      nextFlashcard();
+    }
+
+    // QUIZ GAME LOGIC
+    function startQuiz() {
+      quizCategory = document.getElementById('quiz-category').value;
+      
+      // Filter base pool
+      const pool = MOLECULES_DATA.filter(m => {
+        if (m.id === 'notes_oligo_macro') return false; // skip general concepts notes
+        if (quizCategory === 'all') return true;
+        return m.categorie === quizCategory;
+      });
+
+      if (pool.length < 4) {
+        alert("Pas assez de données pour générer un quiz complet dans cette catégorie.");
+        return;
+      }
+
+      // Generate 10 random questions
+      currentQuizQuestions = [];
+      const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
+      const selectedMolecules = shuffledPool.slice(0, Math.min(10, shuffledPool.length));
+
+      selectedMolecules.forEach(m => {
+        // Randomly pick question type
+        // 0: "Quel est l'élément correspondant à cette indication ?"
+        // 1: "Quelle est l'indication de [Element] ?"
+        // 2: "Quelle est la dose associée à [Element] ?"
+        // 3: "Quel est l'effet indésirable majeur de [Element] ?"
+        const type = Math.floor(Math.random() * 4);
+        let questionText = '';
+        let correctAnswer = '';
+        let incorrectOptions = [];
+
+        if (type === 0 && m.indications.length > 0) {
+          questionText = `Quel élément correspond à l'indication suivante : <strong class="text-indigo-400">« ${m.indications[0]} »</strong> ?`;
+          correctAnswer = m.element;
+          incorrectOptions = pool.filter(x => x.id !== m.id).map(x => x.element);
+        } else if (type === 1 && m.indications.length > 0) {
+          questionText = `Quelle est l'indication principale de l'élément : <strong class="text-indigo-400">${m.element}</strong> ?`;
+          correctAnswer = m.indications[0];
+          incorrectOptions = pool.filter(x => x.id !== m.id && x.indications.length > 0).map(x => x.indications[0]);
+        } else if (type === 2 && m.dose && m.dose !== '-') {
+          questionText = `Quelle est la posologie/dose de l'élément : <strong class="text-indigo-400">${m.element}</strong> ?`;
+          correctAnswer = m.dose;
+          incorrectOptions = pool.filter(x => x.id !== m.id && x.dose !== '-').map(x => x.dose);
+        } else {
+          // Fallback to Adverse effects
+          const eff = m.effets_indesirables.length > 0 ? m.effets_indesirables[0] : (m.details_synthese[0] || 'Non spécifié');
+          questionText = `Quel est l'un des effets indésirables ou détails cliniques majeurs de l'élément : <strong class="text-indigo-400">${m.element}</strong> ?`;
+          correctAnswer = eff;
+          incorrectOptions = pool.filter(x => x.id !== m.id && x.effets_indesirables.length > 0)
+                                 .map(x => x.effets_indesirables[0]);
+        }
+
+        // Deduplicate and pull 3 wrong answers
+        incorrectOptions = [...new Set(incorrectOptions)].filter(x => x !== correctAnswer);
+        // Shuffle wrong options
+        incorrectOptions.sort(() => 0.5 - Math.random());
+        const optionsPool = incorrectOptions.slice(0, 3);
+        optionsPool.push(correctAnswer);
+        optionsPool.sort(() => 0.5 - Math.random()); // Shuffle correct answer in
+
+        currentQuizQuestions.push({
+          elementId: m.id,
+          question: questionText,
+          correct: correctAnswer,
+          options: optionsPool
+        });
+      });
+
+      // Switch view
+      currentQuizIndex = 0;
+      quizScore = 0;
+      document.getElementById('quiz-setup').classList.add('hidden');
+      document.getElementById('quiz-game').classList.remove('hidden');
+      document.getElementById('quiz-results').classList.add('hidden');
+      
+      renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+      selectedAnswerIndex = null;
+      document.getElementById('quiz-next-btn').disabled = true;
+
+      const q = currentQuizQuestions[currentQuizIndex];
+      document.getElementById('quiz-q-num').textContent = currentQuizIndex + 1;
+      document.getElementById('quiz-score-live').textContent = `Score: ${quizScore}`;
+      
+      const percent = Math.round(((currentQuizIndex + 1) / currentQuizQuestions.length) * 100);
+      document.getElementById('quiz-progress').style.width = `${percent}%`;
+
+      document.getElementById('quiz-question-text').innerHTML = q.question;
+
+      const optionsContainer = document.getElementById('quiz-options');
+      optionsContainer.innerHTML = '';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "quiz-opt-btn w-full p-4 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-800/50 hover:border-slate-700 text-left text-xs text-slate-300 font-medium transition-all duration-150 flex items-center justify-between";
+        btn.innerHTML = `
+          <span>${opt}</span>
+          <span class="h-5 w-5 rounded-full border border-slate-700 flex items-center justify-center text-[10px] text-transparent"><i class="fa-solid fa-check"></i></span>
+        `;
+        btn.onclick = () => selectQuizAnswer(idx);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function selectQuizAnswer(index) {
+      if (selectedAnswerIndex !== null) return; // already answered
+      selectedAnswerIndex = index;
+      
+      const q = currentQuizQuestions[currentQuizIndex];
+      const selectedText = q.options[index];
+      const isCorrect = (selectedText === q.correct);
+
+      const btns = document.querySelectorAll('.quiz-opt-btn');
+      
+      btns.forEach((btn, idx) => {
+        btn.disabled = true;
+        const optText = q.options[idx];
+        const spanIcon = btn.querySelector('span:last-child');
+
+        if (optText === q.correct) {
+          // Highlight correct one in green
+          btn.className = "quiz-opt-btn w-full p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-left text-xs font-semibold flex items-center justify-between";
+          spanIcon.className = "h-5 w-5 rounded-full bg-emerald-500 text-slate-900 flex items-center justify-center text-[10px]";
+        } else if (idx === index) {
+          // Incorrectly selected answer in red
+          btn.className = "quiz-opt-btn w-full p-4 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 text-left text-xs font-semibold flex items-center justify-between";
+          spanIcon.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+          spanIcon.className = "h-5 w-5 rounded-full bg-rose-500 text-slate-900 flex items-center justify-center text-[10px]";
+        } else {
+          // Neutral dimming
+          btn.className = "quiz-opt-btn w-full p-4 rounded-xl border border-slate-800 bg-slate-900/10 text-slate-500 text-left text-xs flex items-center justify-between";
+        }
+      });
+
+      if (isCorrect) {
+        quizScore++;
+        streak++;
+      } else {
+        streak = 0;
+      }
+      
+      document.getElementById('quiz-score-live').textContent = `Score: ${quizScore}`;
+      document.getElementById('streak-count').textContent = streak;
+      document.getElementById('quiz-next-btn').disabled = false;
+    }
+
+    function nextQuizQuestion() {
+      currentQuizIndex++;
+      if (currentQuizIndex < currentQuizQuestions.length) {
+        renderQuizQuestion();
+      } else {
+        showQuizResults();
+      }
+    }
+
+    function showQuizResults() {
+      document.getElementById('quiz-game').classList.add('hidden');
+      document.getElementById('quiz-results').classList.remove('hidden');
+
+      const finalScore = quizScore;
+      const total = currentQuizQuestions.length;
+      const pct = Math.round((finalScore / total) * 100);
+
+      // Save quiz result in history
+      quizScoresHistory.push(pct);
+      saveProgress();
+
+      // Checklist update
+      if (pct >= 80) {
+        document.getElementById('check-quiz').checked = true;
+        updateChecklist();
+      }
+
+      document.getElementById('quiz-final-score').textContent = `${finalScore} / ${total}`;
+      document.getElementById('quiz-score-percent').textContent = `${pct}% de réussite`;
+
+      const iconContainer = document.getElementById('quiz-result-icon');
+      const msg = document.getElementById('quiz-result-msg');
+
+      if (pct >= 80) {
+        iconContainer.className = "h-20 w-20 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-4xl border border-emerald-500/30";
+        iconContainer.innerHTML = `<i class="fa-solid fa-trophy"></i>`;
+        msg.textContent = "Excellent travail ! Vous maîtrisez bien cette matière.";
+        // Trigger confetti
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } else if (pct >= 50) {
+        iconContainer.className = "h-20 w-20 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-4xl border border-amber-500/30";
+        iconContainer.innerHTML = `<i class="fa-solid fa-award"></i>`;
+        msg.textContent = "Bon effort ! Quelques révisions supplémentaires vous aideront à vous perfectionner.";
+      } else {
+        iconContainer.className = "h-20 w-20 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-4xl border border-rose-500/30";
+        iconContainer.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i>`;
+        msg.textContent = "N'hésitez pas à relire les fiches de cours et à réessayer l'exercice.";
+      }
+    }
+
+    function retryQuiz() {
+      document.getElementById('quiz-results').classList.add('hidden');
+      document.getElementById('quiz-setup').classList.remove('hidden');
+    }
+
+
+    // TABLE GAME LOGIC (Remplir le tableau)
+    function startTableGame() {
+      tgCategory = document.getElementById('tg-family').value;
+      tgHiddenColumn = document.getElementById('tg-column').value;
+
+      // Filter rows
+      tgActiveRows = MOLECULES_DATA.filter(m => {
+        if (m.id === 'notes_oligo_macro') return false; // skip notes card
+        if (m.id === 'antiacides_detail') return false; // skip comparison card
+        if (tgCategory === 'all') return true;
+        return m.categorie === tgCategory;
+      });
+
+      if (tgActiveRows.length === 0) {
+        alert("Aucun élément trouvé pour cette sélection.");
+        return;
+      }
+
+      // Start state
+      tgScore = 0;
+      tgTotal = tgActiveRows.length;
+
+      // Set titles
+      let colLabel = "Effets Indésirables";
+      if (tgHiddenColumn === 'dose') colLabel = "Doses";
+      if (tgHiddenColumn === 'formes') colLabel = "Formes Chimiques";
+      if (tgHiddenColumn === 'mecanismes') colLabel = "Mécanismes d'action";
+      if (tgHiddenColumn === 'indications') colLabel = "Indications";
+      if (tgHiddenColumn === 'random') colLabel = "Aléatoire";
+
+      document.getElementById('tg-mode-txt').textContent = colLabel;
+      document.getElementById('tg-score-live').textContent = `0 / ${tgTotal}`;
+
+      // Render Table Grid
+      const tbody = document.getElementById('tg-table-body');
+      tbody.innerHTML = '';
+
+      tgActiveRows.forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-900/40 transition-colors";
+
+        // Determine which column is hidden for this row
+        let rowHiddenCol = tgHiddenColumn;
+        if (tgHiddenColumn === 'random') {
+          const cols = ['dose', 'formes', 'mecanismes', 'indications', 'effets_indesirables'];
+          rowHiddenCol = cols[Math.floor(Math.random() * cols.length)];
+        }
+
+        // We build td elements
+        // 1. Famille (non testable)
+        const tdFamille = document.createElement('td');
+        tdFamille.className = "p-4 text-slate-400 font-medium";
+        tdFamille.textContent = row.sous_categorie;
+        tr.appendChild(tdFamille);
+
+        // 2. Element (non testable)
+        const tdElement = document.createElement('td');
+        tdElement.className = "p-4 font-bold text-slate-100";
+        tdElement.textContent = row.element;
+        tr.appendChild(tdElement);
+
+        // Define rendering helper for hidden cells
+        const addCell = (key, cellText, isBulletList = false) => {
+          const td = document.createElement('td');
+          td.className = "p-4 text-slate-300 font-medium";
+
+          if (rowHiddenCol === key) {
+            // Is hidden! Show guessing button
+            const btnId = `tg-guess-${row.id}-${key}`;
+            td.innerHTML = `
+              <button id="${btnId}" onclick="triggerGuess('${row.id}', '${key}')" class="px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 text-[10px] font-bold transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-eye-slash"></i> Deviner
+              </button>
+            `;
+          } else {
+            // Visible
+            if (isBulletList && Array.isArray(cellText)) {
+              td.innerHTML = `<ul class="list-disc pl-4 space-y-0.5">${cellText.map(x => `<li>${x}</li>`).join('')}</ul>`;
+            } else {
+              td.textContent = cellText || '-';
+            }
+          }
+          tr.appendChild(td);
+        };
+
+        addCell('dose', row.dose);
+        addCell('formes', row.formes);
+        addCell('mecanismes', row.mecanismes, true);
+        addCell('indications', row.indications, true);
+        addCell('effets_indesirables', row.effets_indesirables, true);
+
+        tbody.appendChild(tr);
+      });
+
+      // Show view
+      document.getElementById('tg-setup').classList.add('hidden');
+      document.getElementById('tg-game').classList.remove('hidden');
+    }
+
+    function triggerGuess(rowId, column) {
+      const row = MOLECULES_DATA.find(m => m.id === rowId);
+      if (!row) return;
+
+      // Extract original text or array representation
+      let targetVal = row[column];
+      let displayPrompt = '';
+      if (Array.isArray(targetVal)) {
+        displayPrompt = targetVal.join(' ; ');
+        targetVal = targetVal[0] || ''; // matching helper
+      } else {
+        displayPrompt = targetVal;
+      }
+
+      activeGuessCell = {
+        rowId: rowId,
+        column: column,
+        buttonId: `tg-guess-${rowId}-${column}`,
+        correctValue: row[column]
+      };
+
+      // Set up options. We need 4 options total
+      // Draw wrong options from other elements in the database
+      let incorrectOptions = [];
+      MOLECULES_DATA.forEach(m => {
+        if (m.id === rowId || m.id === 'notes_oligo_macro' || m.id === 'antiacides_detail') return;
+        const val = m[column];
+        if (val && val !== '-') {
+          incorrectOptions.push(val);
+        }
+      });
+
+      // Format unique clean string list
+      let finalOptions = [];
+      if (Array.isArray(row[column])) {
+        // Complex lists options: map to single line text representation
+        finalOptions.push(row[column].join(' '));
+        incorrectOptions.forEach(opt => {
+          if (Array.isArray(opt)) {
+            finalOptions.push(opt.join(' '));
+          } else {
+            finalOptions.push(opt);
+          }
+        });
+      } else {
+        finalOptions.push(row[column]);
+        incorrectOptions.forEach(opt => {
+          if (Array.isArray(opt)) {
+            finalOptions.push(opt[0]);
+          } else {
+            finalOptions.push(opt);
+          }
+        });
+      }
+
+      finalOptions = [...new Set(finalOptions)].filter(x => x && x !== '-');
+      // Shuffle and take 3 wrong ones
+      const correctString = Array.isArray(row[column]) ? row[column].join(' ') : row[column];
+      const filteredWrongs = finalOptions.filter(x => x !== correctString);
+      filteredWrongs.sort(() => 0.5 - Math.random());
+      
+      const optionChoices = filteredWrongs.slice(0, 3);
+      optionChoices.push(correctString);
+      optionChoices.sort(() => 0.5 - Math.random());
+
+      // Open Modal
+      document.getElementById('modal-prompt-desc').textContent = `${row.element} (${column})`;
+      document.getElementById('modal-title').textContent = `Compléter pour : ${row.element}`;
+      
+      const container = document.getElementById('modal-options');
+      container.innerHTML = '';
+
+      optionChoices.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "w-full p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-left text-xs font-semibold text-slate-300 transition-colors block";
+        btn.textContent = opt;
+        btn.onclick = () => submitGuess(opt, correctString);
+        container.appendChild(btn);
+      });
+
+      document.getElementById('guess-modal').classList.remove('hidden');
+    }
+
+    function submitGuess(selectedText, correctText) {
+      document.getElementById('guess-modal').classList.add('hidden');
+      
+      const btn = document.getElementById(activeGuessCell.buttonId);
+      if (!btn) return;
+
+      const parentCell = btn.parentElement;
+      const isCorrect = (selectedText === correctText);
+
+      if (isCorrect) {
+        tgScore++;
+        // Replace cell with correct content and styled in green success
+        parentCell.innerHTML = `
+          <div class="p-2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            ${formatGuessOutput(activeGuessCell.correctValue)}
+          </div>
+        `;
+      } else {
+        // Wrong: replace cell with red error and correct text revealed
+        parentCell.innerHTML = `
+          <div class="p-2 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
+            <span class="block text-[9px] line-through text-slate-500">Erreur de choix</span>
+            ${formatGuessOutput(activeGuessCell.correctValue)}
+          </div>
+        `;
+      }
+
+      document.getElementById('tg-score-live').textContent = `${tgScore} / ${tgTotal}`;
+
+      // Check if finished
+      const buttonsLeft = document.querySelectorAll(`button[id^="tg-guess-"]`);
+      if (buttonsLeft.length === 0) {
+        // Trigger completion congrats!
+        confetti({
+          particleCount: 150,
+          spread: 80
+        });
+
+        // Set checklist checked
+        document.getElementById('check-table').checked = true;
+        updateChecklist();
+
+        alert(`Exercice terminé ! Score de réussite directe : ${tgScore} / ${tgTotal}`);
+      }
+    }
+
+    function formatGuessOutput(val) {
+      if (Array.isArray(val)) {
+        return `<ul class="list-disc pl-4 space-y-0.5">${val.map(x => `<li>${x}</li>`).join('')}</ul>`;
+      }
+      return val || '-';
+    }
+
+    function closeGuessModal() {
+      document.getElementById('guess-modal').classList.add('hidden');
+    }
+
+    function quitTableGame() {
+      if (confirm("Voulez-vous quitter cet exercice en cours ?")) {
+        document.getElementById('tg-game').classList.add('hidden');
+        document.getElementById('tg-setup').classList.remove('hidden');
+      }
+    }
+
+
+    // SEARCH SHEET & REFERENCE logic
+    function initSearchSheet() {
+      const container = document.getElementById('search-sheet-results');
+      container.innerHTML = '';
+
+      const query = document.getElementById('sheet-search').value.toLowerCase();
+
+      const filtered = MOLECULES_DATA.filter(m => {
+        // Category Filter
+        if (activeSsCategory !== 'all' && m.categorie !== activeSsCategory) return false;
+
+        // Query Filter
+        if (query) {
+          const matchName = m.element.toLowerCase().includes(query);
+          const matchSub = m.sous_categorie.toLowerCase().includes(query);
+          const matchDose = m.dose.toLowerCase().includes(query);
+          const matchFormes = m.formes.toLowerCase().includes(query);
+          const matchIndics = m.indications.some(x => x.toLowerCase().includes(query));
+          const matchMecs = m.mecanismes.some(x => x.toLowerCase().includes(query));
+          const matchEffs = m.effets_indesirables.some(x => x.toLowerCase().includes(query));
+          
+          return matchName || matchSub || matchDose || matchFormes || matchIndics || matchMecs || matchEffs;
+        }
+
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full p-12 text-center text-slate-500 text-sm">
+            <i class="fa-solid fa-magnifying-glass text-3xl mb-3 block text-slate-600"></i>
+            Aucun résultat trouvé pour votre recherche.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(m => {
+        let borderGlow = 'hover:border-indigo-500/30';
+        let badgeClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+
+        if (m.categorie === 'Anion') {
+          borderGlow = 'hover:border-teal-500/30';
+          badgeClass = 'bg-teal-500/10 text-teal-400 border-teal-500/20';
+        } else if (m.categorie === 'Chélateur') {
+          borderGlow = 'hover:border-amber-500/30';
+          badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        } else if (m.categorie === 'Concepts') {
+          borderGlow = 'hover:border-rose-500/30';
+          badgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+        }
+
+        const card = document.createElement('div');
+        card.className = `p-6 rounded-2xl glass-card border border-slate-800/80 flex flex-col justify-between ${borderGlow}`;
+        
+        // Build html structure
+        card.innerHTML = `
+          <div class="space-y-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <h4 class="font-display font-bold text-lg text-slate-100">${m.element}</h4>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wide font-semibold mt-0.5">${m.sous_categorie}</p>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase border ${badgeClass}">${m.categorie}</span>
+            </div>
+
+            <div class="space-y-2.5 text-xs">
+              <div class="grid grid-cols-2 gap-2">
+                <div class="p-2 rounded-lg bg-slate-900/40">
+                  <span class="text-[9px] text-slate-400 block font-semibold uppercase tracking-wider">Dose</span>
+                  <span class="text-slate-200 font-bold">${m.dose}</span>
+                </div>
+                <div class="p-2 rounded-lg bg-slate-900/40">
+                  <span class="text-[9px] text-slate-400 block font-semibold uppercase tracking-wider">Forme</span>
+                  <span class="text-slate-200 font-bold truncate block" title="${m.formes}">${m.formes}</span>
+                </div>
+              </div>
+
+              <div>
+                <span class="text-[9px] text-slate-400 block font-semibold uppercase tracking-wider">Indications</span>
+                <p class="text-slate-300 font-medium line-clamp-2" title="${m.indications.join(' ; ')}">${m.indications.join(' ; ') || '-'}</p>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="studyMoleculesSpecific('${m.id}')" class="mt-5 w-full py-2.5 rounded-xl bg-slate-800/60 hover:bg-indigo-600 hover:text-white border border-slate-700/50 hover:border-transparent text-slate-300 font-semibold text-xs transition-all flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-clone text-[10px]"></i> Voir la fiche complète
+          </button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function searchMolecules() {
+      initSearchSheet();
+    }
+
+    function filterSearchSheet(cat) {
+      activeSsCategory = cat;
+      document.querySelectorAll('.ss-filter-btn').forEach(btn => {
+        btn.className = "ss-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200 transition-all whitespace-nowrap";
+      });
+      document.getElementById(`ss-filter-${cat}`).className = "ss-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition-all whitespace-nowrap";
+      
+      initSearchSheet();
+    }
+  </script>
+</body>
+</html>
