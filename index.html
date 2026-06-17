@@ -60,44 +60,7 @@
       transform: translateY(-2px);
     }
 
-    /* Flashcard 3D flip effect */
-    .card-container {
-      perspective: 1200px;
-    }
-
-    .flashcard {
-      position: relative;
-      width: 100%;
-      height: 480px;
-      transform-style: preserve-3d;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .flashcard.is-flipped {
-      transform: rotateY(180deg);
-    }
-
-    .card-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      border-radius: 1.5rem;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
-    }
-
-    .card-front {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
-    }
-
-    .card-back {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
-      transform: rotateY(180deg);
-    }
+    /* Flashcard CSS animations removed to use instant show/hide like table cells */
 
     /* Custom scrollbar */
     ::-webkit-scrollbar {
@@ -343,83 +306,69 @@
           </div>
 
           <!-- Flashcard Deck Area -->
-          <div class="max-w-2xl mx-auto card-container">
-            <div onclick="flipFlashcard()" id="flashcard" class="flashcard cursor-pointer">
-              <!-- FRONT -->
-              <div class="card-face card-front p-8 flex flex-col justify-between items-center text-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.06),transparent_60%)]"></div>
-                <!-- Category Badge -->
-                <div id="fc-badge-front" class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 z-10">
-                  Cation
-                </div>
-                <!-- Element Name -->
-                <div class="my-auto z-10 space-y-4">
-                  <h3 id="fc-name-front" class="font-display font-black text-5xl text-white tracking-tight">Lithium</h3>
-                  <p id="fc-sub-front" class="text-sm text-slate-400 uppercase tracking-widest font-semibold">Groupe I - Alcalins</p>
-                </div>
-                <!-- Action tip -->
-                <div class="text-xs text-slate-500 font-medium z-10">
-                  <i class="fa-solid fa-rotate-left mr-1.5"></i> Cliquer pour retourner la fiche
-                </div>
-              </div>
+          <div class="max-w-2xl mx-auto">
+            <div id="flashcard" class="w-full h-[525px] rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900/90 to-slate-950/95 shadow-2xl p-6 flex flex-col justify-between relative overflow-hidden">
               
-              <!-- BACK -->
-              <div class="card-face card-back p-6 flex flex-col justify-between overflow-hidden">
-                <!-- Header -->
-                <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 flex-shrink-0">
-                  <div>
-                    <h4 id="fc-name-back" class="font-display font-bold text-xl text-white">Lithium</h4>
-                    <span id="fc-sub-back" class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Groupe I - Alcalins</span>
-                  </div>
-                  <div id="fc-badge-back" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <!-- HEADER -->
+              <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 flex-shrink-0">
+                <div>
+                  <h4 id="fc-name" class="font-display font-bold text-2xl text-white">Lithium</h4>
+                  <span id="fc-sub" class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Groupe I - Alcalins</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div id="fc-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                     Cation
                   </div>
+                  <!-- Global Toggle for this Card's details -->
+                  <button onclick="toggleAllFcFields()" id="fc-global-toggle-btn" class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold text-xs transition-all flex items-center gap-1.5" title="Afficher/Masquer toutes les sections">
+                    <i class="fa-solid fa-eye"></i> <span>Révéler tout</span>
+                  </button>
                 </div>
+              </div>
 
-                <!-- Info Grid (Scrollable) -->
-                <div class="flex-1 overflow-y-auto py-4 space-y-4 text-xs">
-                  <!-- Dose & Forme -->
-                  <div class="grid grid-cols-2 gap-4">
-                    <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800/40">
-                      <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-0.5">Dose</span>
-                      <p id="fc-dose" class="text-slate-200 font-semibold">400 mg</p>
-                    </div>
-                    <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800/40">
-                      <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-0.5">Forme(s) Chimique(s)</span>
-                      <p id="fc-formes" class="text-slate-200 font-semibold">Carbonate de lithium</p>
-                    </div>
-                  </div>
-
-                  <!-- Mécanisme -->
+              <!-- Info Grid (Scrollable) -->
+              <div class="flex-1 overflow-y-auto pr-1 py-4 space-y-4 text-xs">
+                <!-- Dose & Forme -->
+                <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <span class="text-[10px] text-indigo-400 uppercase tracking-wider font-bold block mb-1">Mécanisme d'action & Effets</span>
-                    <ul id="fc-mecanismes" class="list-disc pl-4 space-y-1 text-slate-300"></ul>
+                    <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-1">Dose</span>
+                    <div id="fc-field-dose"></div>
                   </div>
-
-                  <!-- Indications -->
                   <div>
-                    <span class="text-[10px] text-emerald-400 uppercase tracking-wider font-bold block mb-1">Indications</span>
-                    <ul id="fc-indications" class="list-disc pl-4 space-y-1 text-slate-300"></ul>
-                  </div>
-
-                  <!-- Effets Indésirables -->
-                  <div>
-                    <span class="text-[10px] text-rose-400 uppercase tracking-wider font-bold block mb-1">Effets Indésirables & Interactions</span>
-                    <ul id="fc-effets" class="list-disc pl-4 space-y-1 text-slate-300"></ul>
-                  </div>
-
-                  <!-- Détails Synthèse supplémentaire -->
-                  <div id="fc-details-box" class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/60">
-                    <span class="text-[10px] text-purple-400 uppercase tracking-wider font-bold block mb-1.5"><i class="fa-solid fa-circle-info mr-1"></i> Fiche de cours complète</span>
-                    <ul id="fc-details" class="list-disc pl-4 space-y-1 text-slate-300"></ul>
+                    <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-1">Forme(s) Chimique(s)</span>
+                    <div id="fc-field-formes"></div>
                   </div>
                 </div>
 
-                <!-- Footer controls inside card back -->
-                <div class="border-t border-slate-800/80 pt-3 flex-shrink-0 flex items-center justify-between text-xs text-slate-500">
-                  <span>Cliquer n'importe où pour retourner</span>
-                  <span class="flex items-center gap-1"><i class="fa-solid fa-award text-yellow-500"></i> Auto-évaluation</span>
+                <!-- Mécanisme -->
+                <div>
+                  <span class="text-[10px] text-indigo-400 uppercase tracking-wider font-bold block mb-1">Mécanisme d'action & Effets</span>
+                  <div id="fc-field-mecanismes"></div>
                 </div>
+
+                <!-- Indications -->
+                <div>
+                  <span class="text-[10px] text-emerald-400 uppercase tracking-wider font-bold block mb-1">Indications</span>
+                  <div id="fc-field-indications"></div>
+                </div>
+
+                <!-- Effets Indésirables -->
+                <div>
+                  <span class="text-[10px] text-rose-400 uppercase tracking-wider font-bold block mb-1">Effets Indésirables & Interactions</span>
+                  <div id="fc-field-effets"></div>
+                </div>
+
+                <!-- Détails Synthèse supplémentaire -->
+                <div id="fc-details-box" class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/60">
+                  <span class="text-[10px] text-purple-400 uppercase tracking-wider font-bold block mb-1.5"><i class="fa-solid fa-circle-info mr-1"></i> Fiche de cours complète</span>
+                  <div id="fc-field-details"></div>
+                </div>
+              </div>
+
+              <!-- Footer info -->
+              <div class="border-t border-slate-800/80 pt-3 flex-shrink-0 flex items-center justify-between text-[11px] text-slate-500">
+                <span>Cliquez sur une section pour l'afficher ou la masquer</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-award text-yellow-500"></i> Auto-évaluation ci-dessous</span>
               </div>
             </div>
           </div>
@@ -511,7 +460,7 @@
           </div>
 
           <!-- Quiz Results Screen -->
-          <div id="quiz-results" class="max-w-md mx-auto p-8 rounded-3xl glass-panel text-center space-y-6 hidden">
+          <div id="quiz-results" class="max-w-xl mx-auto p-8 rounded-3xl glass-panel text-center space-y-6 hidden">
             <div id="quiz-result-icon" class="h-20 w-20 rounded-full flex items-center justify-center mx-auto text-4xl">
               <!-- Trophy or check icon -->
             </div>
@@ -526,8 +475,19 @@
               <p id="quiz-score-percent" class="text-xs text-indigo-300 font-semibold mt-1">80% de réussite</p>
             </div>
 
-            <div class="flex gap-4">
-              <button onclick="retryQuiz()" class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all">
+            <!-- Quiz Recap section -->
+            <div class="text-left space-y-3">
+              <h4 class="font-display font-semibold text-sm text-slate-300 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-indigo-400"></i>
+                Récapitulatif des réponses :
+              </h4>
+              <div id="quiz-recap-container" class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                <!-- Dynamically generated list items of the 10 questions -->
+              </div>
+            </div>
+
+            <div class="flex gap-4 pt-2">
+              <button onclick="retryQuiz()" class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-600/20">
                 Recommencer
               </button>
               <button onclick="switchTab('dashboard')" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all border border-slate-700">
@@ -538,79 +498,93 @@
         </section>
 
         <!-- TAB: TABLEGAME -->
-        <section id="tab-tablegame" class="tab-view space-y-8 hidden">
-          <!-- Game config -->
-          <div id="tg-setup" class="max-w-xl mx-auto p-8 rounded-3xl glass-panel space-y-6">
-            <div class="text-center space-y-2">
-              <div class="h-16 w-16 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center mx-auto border border-purple-500/30">
-                <i class="fa-solid fa-table-cells text-3xl"></i>
-              </div>
-              <h3 class="font-display font-bold text-2xl text-white">Remplir le Tableau</h3>
-              <p class="text-sm text-slate-400">Défiez-vous en complétant le tableau officiel d'examen avec des cellules masquées.</p>
-            </div>
-
-            <div class="space-y-4">
+        <section id="tab-tablegame" class="tab-view space-y-6 hidden">
+          <!-- Table Controls Header -->
+          <div class="p-6 rounded-2xl glass-panel flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div class="flex flex-wrap items-center gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">1. Filtrer les Éléments</label>
-                <select id="tg-family" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Filtrer par Famille</label>
+                <select id="tg-family" onchange="renderTableGameGrid()" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
                   <option value="all">Tout le programme</option>
                   <option value="Cation">Cations uniquement</option>
                   <option value="Anion">Anions uniquement</option>
                   <option value="Chélateur">Chélateurs uniquement</option>
                 </select>
               </div>
-
-              <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">2. Colonne à masquer (Test)</label>
-                <select id="tg-column" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                  <option value="effets_indesirables">Effets Indésirables</option>
-                  <option value="indications">Indications</option>
-                  <option value="mecanismes">Mécanismes d'action</option>
-                  <option value="formes">Formes Chimiques</option>
-                  <option value="dose">Doses</option>
-                  <option value="random">Aléatoire (Toutes colonnes mélangées)</option>
-                </select>
-              </div>
             </div>
 
-            <button onclick="startTableGame()" class="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-purple-600/30">
-              Lancer l'exercice
-            </button>
-          </div>
-
-          <!-- Active Game Screen -->
-          <div id="tg-game" class="space-y-4 hidden">
-            <!-- Header bar -->
-            <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl glass-panel">
-              <div class="flex items-center gap-4">
-                <span class="text-sm font-medium text-slate-300">Exercice en cours : <span id="tg-mode-txt" class="font-bold text-purple-400">Effets Indésirables</span></span>
-                <span class="h-4 w-px bg-slate-800"></span>
-                <span class="text-sm font-medium text-slate-300">Complétion : <span id="tg-score-live" class="font-bold text-emerald-400">0 / 0</span></span>
-              </div>
-              <button onclick="quitTableGame()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors border border-slate-700">
-                Quitter l'exercice
+            <!-- Global Actions -->
+            <div class="flex gap-2.5">
+              <button onclick="hideAllTableCells()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-bold text-xs transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-eye-slash"></i> Masquer tout
+              </button>
+              <button onclick="showAllTableCells()" class="px-4 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 font-bold text-xs transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-eye"></i> Afficher tout
               </button>
             </div>
+          </div>
 
-            <!-- The Grid Table Wrapper -->
-            <div class="overflow-x-auto rounded-2xl border border-slate-800 glass-panel">
-              <table class="w-full min-w-[1000px] border-collapse text-left text-xs">
-                <thead>
-                  <tr class="bg-slate-900 border-b border-slate-800 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                    <th class="p-4 w-[120px]">Famille</th>
-                    <th class="p-4 w-[120px]">Élément</th>
-                    <th class="p-4 w-[100px]">Dose</th>
-                    <th class="p-4 w-[160px]">Formes Chimiques</th>
-                    <th class="p-4 w-[220px]">Mécanismes / Effets</th>
-                    <th class="p-4 w-[220px]">Indications</th>
-                    <th class="p-4">Effets Indésirables</th>
-                  </tr>
-                </thead>
-                <tbody id="tg-table-body" class="divide-y divide-slate-800/60">
-                  <!-- Row entries will be dynamically rendered here -->
-                </tbody>
-              </table>
-            </div>
+          <!-- Description banner -->
+          <div class="p-4 rounded-xl bg-indigo-950/20 border border-indigo-500/10 text-xs text-indigo-300 flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-base"></i>
+            <span>
+              <strong>Méthode d'auto-évaluation active :</strong> Cliquez sur n'importe quelle cellule grise pour révéler sa réponse. Cliquez à nouveau sur le contenu pour le masquer. Vous pouvez masquer/afficher des colonnes ou lignes entières via les boutons d'œil 👁️.
+            </span>
+          </div>
+
+          <!-- The Grid Table Wrapper -->
+          <div class="overflow-x-auto rounded-2xl border border-slate-800 glass-panel">
+            <table class="w-full min-w-[1580px] border-collapse text-left text-xs">
+              <thead>
+                <tr class="bg-slate-900 border-b border-slate-800 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                  <th class="p-4 w-[150px]">Famille</th>
+                  <th class="p-4 w-[130px]">Élément</th>
+                  <th class="p-4 w-[100px]">
+                    <div class="flex flex-col gap-1">
+                      <span>Dose</span>
+                      <button onclick="toggleColumn('dose')" class="self-start text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded flex items-center gap-1 mt-1 font-medium transition-all" title="Masquer/Afficher la colonne">
+                        <i class="fa-solid fa-eye text-[9px]"></i> Toggle
+                      </button>
+                    </div>
+                  </th>
+                  <th class="p-4 w-[180px]">
+                    <div class="flex flex-col gap-1">
+                      <span>Formes Chimiques</span>
+                      <button onclick="toggleColumn('formes')" class="self-start text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded flex items-center gap-1 mt-1 font-medium transition-all" title="Masquer/Afficher la colonne">
+                        <i class="fa-solid fa-eye text-[9px]"></i> Toggle
+                      </button>
+                    </div>
+                  </th>
+                  <th class="p-4 w-[320px]">
+                    <div class="flex flex-col gap-1">
+                      <span>Mécanismes / Effets</span>
+                      <button onclick="toggleColumn('mecanismes')" class="self-start text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded flex items-center gap-1 mt-1 font-medium transition-all" title="Masquer/Afficher la colonne">
+                        <i class="fa-solid fa-eye text-[9px]"></i> Toggle
+                      </button>
+                    </div>
+                  </th>
+                  <th class="p-4 w-[320px]">
+                    <div class="flex flex-col gap-1">
+                      <span>Indications</span>
+                      <button onclick="toggleColumn('indications')" class="self-start text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded flex items-center gap-1 mt-1 font-medium transition-all" title="Masquer/Afficher la colonne">
+                        <i class="fa-solid fa-eye text-[9px]"></i> Toggle
+                      </button>
+                    </div>
+                  </th>
+                  <th class="p-4 w-[380px]">
+                    <div class="flex flex-col gap-1">
+                      <span>Effets Indésirables</span>
+                      <button onclick="toggleColumn('effets_indesirables')" class="self-start text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded flex items-center gap-1 mt-1 font-medium transition-all" title="Masquer/Afficher la colonne">
+                        <i class="fa-solid fa-eye text-[9px]"></i> Toggle
+                      </button>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tg-table-body" class="divide-y divide-slate-800/60">
+                <!-- Row entries will be dynamically rendered here -->
+              </tbody>
+            </table>
           </div>
         </section>
 
@@ -679,7 +653,14 @@
     // Flashcard State
     let flashcardIndex = 0;
     let filteredFlashcardsList = [];
-    let isFlipped = false;
+    let fcFieldsState = {
+      dose: false,
+      formes: false,
+      mecanismes: false,
+      indications: false,
+      effets: false,
+      details: false
+    };
     let activeFcCategory = 'all';
 
     // Quiz State
@@ -688,6 +669,7 @@
     let currentQuizIndex = 0;
     let quizScore = 0;
     let selectedAnswerIndex = null;
+    let currentQuizAnswersRecap = []; // Stores recap of the 10 questions of the active quiz run
 
     // Table Game State
     let tgCategory = 'all';
@@ -748,6 +730,8 @@
         initFlashcards();
       } else if (tabName === 'searchsheet') {
         initSearchSheet();
+      } else if (tabName === 'tablegame') {
+        initTableGame();
       }
     }
 
@@ -879,6 +863,12 @@
         activeFcCategory = 'all';
         filteredFlashcardsList = [...MOLECULES_DATA];
         flashcardIndex = idx;
+        
+        // Reset fields state
+        Object.keys(fcFieldsState).forEach(k => {
+          fcFieldsState[k] = false;
+        });
+
         switchTab('flashcards');
         renderFlashcard();
       }
@@ -902,8 +892,12 @@
         flashcardIndex = 0;
       }
       document.getElementById('fc-total').textContent = filteredFlashcardsList.length;
-      isFlipped = false;
-      document.getElementById('flashcard').classList.remove('is-flipped');
+      
+      // Reset all fields to hidden by default for the new list
+      Object.keys(fcFieldsState).forEach(k => {
+        fcFieldsState[k] = false;
+      });
+      
       renderFlashcard();
     }
 
@@ -931,76 +925,123 @@
       if (m.categorie === 'Chélateur') badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
       if (m.categorie === 'Concepts') badgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
 
-      // FRONT
-      const badgeFront = document.getElementById('fc-badge-front');
-      badgeFront.textContent = m.categorie;
-      badgeFront.className = `px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border z-10 ${badgeClass}`;
+      const badge = document.getElementById('fc-badge');
+      badge.textContent = m.categorie;
+      badge.className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${badgeClass}`;
 
-      document.getElementById('fc-name-front').textContent = m.element;
-      document.getElementById('fc-sub-front').textContent = m.sous_categorie;
+      document.getElementById('fc-name').textContent = m.element;
+      document.getElementById('fc-sub').textContent = m.sous_categorie;
 
-      // BACK
-      const badgeBack = document.getElementById('fc-badge-back');
-      badgeBack.textContent = m.categorie;
-      badgeBack.className = `px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${badgeClass}`;
+      // Render individual fields based on fcFieldsState
+      renderFcField('dose', m.dose, false);
+      renderFcField('formes', m.formes, false);
+      renderFcField('mecanismes', m.mecanismes, true);
+      renderFcField('indications', m.indications, true);
+      renderFcField('effets', m.effets_indesirables, true);
 
-      document.getElementById('fc-name-back').textContent = m.element;
-      document.getElementById('fc-sub-back').textContent = m.sous_categorie;
-      document.getElementById('fc-dose').textContent = m.dose;
-      document.getElementById('fc-formes').textContent = m.formes;
-
-      // Bullet points
-      renderList('fc-mecanismes', m.mecanismes);
-      renderList('fc-indications', m.indications);
-      renderList('fc-effets', m.effets_indesirables);
-      
       // Synthesis specific bullet points
       if (m.details_synthese && m.details_synthese.length > 0) {
         document.getElementById('fc-details-box').classList.remove('hidden');
-        renderList('fc-details', m.details_synthese);
+        renderFcField('details', m.details_synthese, true);
       } else {
         document.getElementById('fc-details-box').classList.add('hidden');
       }
+
+      updateFcGlobalToggleButtonText();
     }
 
-    function renderList(elemId, list) {
-      const container = document.getElementById(elemId);
-      container.innerHTML = '';
-      if (!list || list.length === 0) {
-        container.innerHTML = `<li class="text-slate-500 italic">Aucune donnée spécifique.</li>`;
-        return;
-      }
-      list.forEach(item => {
-        const li = document.createElement('li');
-        li.textContent = item;
-        container.appendChild(li);
-      });
-    }
+    function renderFcField(fieldName, value, isList) {
+      const container = document.getElementById(`fc-field-${fieldName}`);
+      if (!container) return;
 
-    function flipFlashcard() {
-      isFlipped = !isFlipped;
-      const card = document.getElementById('flashcard');
-      if (isFlipped) {
-        card.classList.add('is-flipped');
+      const isVisible = fcFieldsState[fieldName];
+
+      if (isVisible) {
+        let contentHtml = '';
+        if (isList) {
+          if (!value || value.length === 0) {
+            contentHtml = `<li class="text-slate-500 italic">Aucune donnée spécifique.</li>`;
+          } else {
+            contentHtml = `<ul class="list-disc pl-4 space-y-1 text-slate-300">${value.map(x => `<li>${x}</li>`).join('')}</ul>`;
+          }
+        } else {
+          contentHtml = `<p class="text-slate-200 font-semibold">${value || '-'}</p>`;
+        }
+        container.className = "p-3 font-medium text-slate-300 bg-indigo-500/5 border border-slate-800/60 rounded-xl hover:bg-slate-900/40 transition-all relative group cursor-pointer";
+        container.innerHTML = `
+          <div onclick="toggleFcField('${fieldName}')" class="pr-5 py-1 min-h-[40px] flex items-center">${contentHtml}</div>
+          <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 text-[9px]">
+            <i class="fa-solid fa-eye-slash" title="Cliquer pour masquer"></i>
+          </div>
+        `;
       } else {
-        card.classList.remove('is-flipped');
+        container.className = "cursor-pointer";
+        container.innerHTML = `
+          <div onclick="toggleFcField('${fieldName}')" class="py-2.5 px-3 rounded-xl border border-dashed border-slate-800/80 bg-slate-950/45 hover:bg-slate-900/30 hover:border-slate-700 transition-all text-center text-slate-500/80 flex items-center justify-center gap-1.5 min-h-[40px]">
+            <i class="fa-solid fa-eye-slash text-[10px]"></i>
+            <span class="text-[9px] font-bold tracking-wider uppercase">Révéler</span>
+          </div>
+        `;
       }
+    }
+
+    function toggleFcField(fieldName) {
+      fcFieldsState[fieldName] = !fcFieldsState[fieldName];
+      // Re-render only that field
+      if (filteredFlashcardsList.length === 0) return;
+      const m = filteredFlashcardsList[flashcardIndex];
+      if (fieldName === 'dose') renderFcField('dose', m.dose, false);
+      if (fieldName === 'formes') renderFcField('formes', m.formes, false);
+      if (fieldName === 'mecanismes') renderFcField('mecanismes', m.mecanismes, true);
+      if (fieldName === 'indications') renderFcField('indications', m.indications, true);
+      if (fieldName === 'effets') renderFcField('effets', m.effets_indesirables, true);
+      if (fieldName === 'details') renderFcField('details', m.details_synthese, true);
+      
+      updateFcGlobalToggleButtonText();
+    }
+
+    function toggleAllFcFields() {
+      const anyHidden = Object.keys(fcFieldsState).some(k => !fcFieldsState[k]);
+      Object.keys(fcFieldsState).forEach(k => {
+        fcFieldsState[k] = anyHidden;
+      });
+      renderFlashcard();
+    }
+
+    function updateFcGlobalToggleButtonText() {
+      const btn = document.getElementById('fc-global-toggle-btn');
+      if (!btn) return;
+      const anyHidden = Object.keys(fcFieldsState).some(k => !fcFieldsState[k]);
+      if (anyHidden) {
+        btn.innerHTML = `<i class="fa-solid fa-eye"></i> <span>Révéler tout</span>`;
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-eye-slash"></i> <span>Masquer tout</span>`;
+      }
+    }
+
+    function changeFlashcard(direction) {
+      if (filteredFlashcardsList.length === 0) return;
+      
+      if (direction === 'next') {
+        flashcardIndex = (flashcardIndex + 1) % filteredFlashcardsList.length;
+      } else {
+        flashcardIndex = (flashcardIndex - 1 + filteredFlashcardsList.length) % filteredFlashcardsList.length;
+      }
+      
+      // Reset all fields to hidden by default for the new card
+      Object.keys(fcFieldsState).forEach(k => {
+        fcFieldsState[k] = false;
+      });
+      
+      renderFlashcard();
     }
 
     function prevFlashcard() {
-      if (filteredFlashcardsList.length === 0) return;
-      flashcardIndex = (flashcardIndex - 1 + filteredFlashcardsList.length) % filteredFlashcardsList.length;
-      isFlipped = false;
-      document.getElementById('flashcard').classList.remove('is-flipped');
-      setTimeout(renderFlashcard, 150); // wait transition half time
+      changeFlashcard('prev');
     }
 
     function nextFlashcard() {
-      if (filteredFlashcardsList.length === 0) return;
-      flashcardIndex = (flashcardIndex + 1) % filteredFlashcardsList.length;
-      isFlipped = false;
-      document.getElementById('flashcard').classList.remove('is-flipped');
-      setTimeout(renderFlashcard, 150);
+      changeFlashcard('next');
     }
 
     function gradeFlashcard(knows) {
@@ -1008,11 +1049,9 @@
       masteredElements[m.id] = knows;
       saveProgress();
 
-      // Mini micro-animation
       const activeBtn = document.getElementById('check-flash');
       if (activeBtn) activeBtn.checked = true;
 
-      // Toast indicator or color flash
       nextFlashcard();
     }
 
@@ -1034,6 +1073,7 @@
 
       // Generate 10 random questions
       currentQuizQuestions = [];
+      currentQuizAnswersRecap = []; // Clear recap array
       const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
       const selectedMolecules = shuffledPool.slice(0, Math.min(10, shuffledPool.length));
 
@@ -1131,6 +1171,14 @@
       const selectedText = q.options[index];
       const isCorrect = (selectedText === q.correct);
 
+      // Record answer details for post-quiz review
+      currentQuizAnswersRecap.push({
+        question: q.question,
+        correct: q.correct,
+        selected: selectedText,
+        isCorrect: isCorrect
+      });
+
       const btns = document.querySelectorAll('.quiz-opt-btn');
       
       btns.forEach((btn, idx) => {
@@ -1195,6 +1243,33 @@
       document.getElementById('quiz-final-score').textContent = `${finalScore} / ${total}`;
       document.getElementById('quiz-score-percent').textContent = `${pct}% de réussite`;
 
+      // Render recap list of questions
+      const recapContainer = document.getElementById('quiz-recap-container');
+      recapContainer.innerHTML = '';
+
+      currentQuizAnswersRecap.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = `p-3 rounded-xl border text-xs ${item.isCorrect ? 'bg-emerald-500/5 border-emerald-500/10' : 'bg-rose-500/5 border-rose-500/10'}`;
+        
+        let statusIcon = item.isCorrect 
+          ? `<span class="text-emerald-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Question ${idx + 1} : Correct</span>`
+          : `<span class="text-rose-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Question ${idx + 1} : Incorrect</span>`;
+
+        let selectedDetails = item.isCorrect
+          ? `<p class="mt-1 text-slate-300 font-medium">Réponse : <span class="text-emerald-400 font-semibold">${item.selected}</span></p>`
+          : `<p class="mt-1 text-slate-300 font-medium">Votre réponse : <span class="text-rose-400 font-semibold line-through">${item.selected}</span></p>
+             <p class="mt-0.5 text-slate-400 font-medium">Réponse correcte : <span class="text-emerald-400 font-semibold">${item.correct}</span></p>`;
+
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            ${statusIcon}
+          </div>
+          <p class="mt-1.5 text-slate-200 font-semibold leading-normal">${item.question}</p>
+          ${selectedDetails}
+        `;
+        recapContainer.appendChild(div);
+      });
+
       const iconContainer = document.getElementById('quiz-result-icon');
       const msg = document.getElementById('quiz-result-msg');
 
@@ -1226,10 +1301,12 @@
 
 
     // TABLE GAME LOGIC (Remplir le tableau)
-    function startTableGame() {
-      tgCategory = document.getElementById('tg-family').value;
-      tgHiddenColumn = document.getElementById('tg-column').value;
+    let tableCellsState = {}; // { 'lithium-dose': false, ... }
 
+    function initTableGame() {
+      // Default family selection
+      tgCategory = document.getElementById('tg-family') ? document.getElementById('tg-family').value : 'all';
+      
       // Filter rows
       tgActiveRows = MOLECULES_DATA.filter(m => {
         if (m.id === 'notes_oligo_macro') return false; // skip notes card
@@ -1238,237 +1315,153 @@
         return m.categorie === tgCategory;
       });
 
-      if (tgActiveRows.length === 0) {
-        alert("Aucun élément trouvé pour cette sélection.");
-        return;
-      }
+      // Initialize all cell states to false (hidden) if they aren't already initialized
+      tgActiveRows.forEach(row => {
+        const cols = ['dose', 'formes', 'mecanismes', 'indications', 'effets_indesirables'];
+        cols.forEach(col => {
+          const key = `${row.id}-${col}`;
+          if (tableCellsState[key] === undefined) {
+            tableCellsState[key] = false;
+          }
+        });
+      });
 
-      // Start state
-      tgScore = 0;
-      tgTotal = tgActiveRows.length;
+      renderTableGameGrid();
+    }
 
-      // Set titles
-      let colLabel = "Effets Indésirables";
-      if (tgHiddenColumn === 'dose') colLabel = "Doses";
-      if (tgHiddenColumn === 'formes') colLabel = "Formes Chimiques";
-      if (tgHiddenColumn === 'mecanismes') colLabel = "Mécanismes d'action";
-      if (tgHiddenColumn === 'indications') colLabel = "Indications";
-      if (tgHiddenColumn === 'random') colLabel = "Aléatoire";
+    function renderTableGameGrid() {
+      tgCategory = document.getElementById('tg-family').value;
+      tgActiveRows = MOLECULES_DATA.filter(m => {
+        if (m.id === 'notes_oligo_macro') return false;
+        if (m.id === 'antiacides_detail') return false;
+        if (tgCategory === 'all') return true;
+        return m.categorie === tgCategory;
+      });
 
-      document.getElementById('tg-mode-txt').textContent = colLabel;
-      document.getElementById('tg-score-live').textContent = `0 / ${tgTotal}`;
-
-      // Render Table Grid
       const tbody = document.getElementById('tg-table-body');
       tbody.innerHTML = '';
 
-      tgActiveRows.forEach((row, rowIndex) => {
+      tgActiveRows.forEach(row => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-900/40 transition-colors";
 
-        // Determine which column is hidden for this row
-        let rowHiddenCol = tgHiddenColumn;
-        if (tgHiddenColumn === 'random') {
-          const cols = ['dose', 'formes', 'mecanismes', 'indications', 'effets_indesirables'];
-          rowHiddenCol = cols[Math.floor(Math.random() * cols.length)];
-        }
-
-        // We build td elements
-        // 1. Famille (non testable)
+        // 1. Famille
         const tdFamille = document.createElement('td');
-        tdFamille.className = "p-4 text-slate-400 font-medium";
+        tdFamille.className = "p-4 text-slate-400 font-medium border-b border-slate-800/60";
         tdFamille.textContent = row.sous_categorie;
         tr.appendChild(tdFamille);
 
-        // 2. Element (non testable)
+        // 2. Element + Row toggle eye button
         const tdElement = document.createElement('td');
-        tdElement.className = "p-4 font-bold text-slate-100";
-        tdElement.textContent = row.element;
+        tdElement.className = "p-4 font-bold text-slate-100 border-b border-slate-800/60";
+        tdElement.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span>${row.element}</span>
+            <button onclick="toggleRow('${row.id}')" class="text-slate-500 hover:text-indigo-400 transition-colors" title="Masquer/Afficher toute la ligne">
+              <i class="fa-solid fa-eye text-[11px]"></i>
+            </button>
+          </div>
+        `;
         tr.appendChild(tdElement);
 
-        // Define rendering helper for hidden cells
-        const addCell = (key, cellText, isBulletList = false) => {
+        // 3-7. The testable columns
+        const cols = ['dose', 'formes', 'mecanismes', 'indications', 'effets_indesirables'];
+        cols.forEach(col => {
           const td = document.createElement('td');
-          td.className = "p-4 text-slate-300 font-medium";
-
-          if (rowHiddenCol === key) {
-            // Is hidden! Show guessing button
-            const btnId = `tg-guess-${row.id}-${key}`;
-            td.innerHTML = `
-              <button id="${btnId}" onclick="triggerGuess('${row.id}', '${key}')" class="px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 text-[10px] font-bold transition-all flex items-center gap-1.5">
-                <i class="fa-solid fa-eye-slash"></i> Deviner
-              </button>
-            `;
-          } else {
-            // Visible
-            if (isBulletList && Array.isArray(cellText)) {
-              td.innerHTML = `<ul class="list-disc pl-4 space-y-0.5">${cellText.map(x => `<li>${x}</li>`).join('')}</ul>`;
-            } else {
-              td.textContent = cellText || '-';
-            }
-          }
+          td.id = `cell-${row.id}-${col}`;
           tr.appendChild(td);
-        };
-
-        addCell('dose', row.dose);
-        addCell('formes', row.formes);
-        addCell('mecanismes', row.mecanismes, true);
-        addCell('indications', row.indications, true);
-        addCell('effets_indesirables', row.effets_indesirables, true);
+        });
 
         tbody.appendChild(tr);
-      });
 
-      // Show view
-      document.getElementById('tg-setup').classList.add('hidden');
-      document.getElementById('tg-game').classList.remove('hidden');
+        // Render cell contents
+        cols.forEach(col => {
+          renderCell(row.id, col);
+        });
+      });
     }
 
-    function triggerGuess(rowId, column) {
-      const row = MOLECULES_DATA.find(m => m.id === rowId);
-      if (!row) return;
+    function renderCell(rowId, colName) {
+      const cellId = `cell-${rowId}-${colName}`;
+      const cell = document.getElementById(cellId);
+      if (!cell) return;
 
-      // Extract original text or array representation
-      let targetVal = row[column];
-      let displayPrompt = '';
-      if (Array.isArray(targetVal)) {
-        displayPrompt = targetVal.join(' ; ');
-        targetVal = targetVal[0] || ''; // matching helper
-      } else {
-        displayPrompt = targetVal;
-      }
+      const rowData = MOLECULES_DATA.find(m => m.id === rowId);
+      if (!rowData) return;
 
-      activeGuessCell = {
-        rowId: rowId,
-        column: column,
-        buttonId: `tg-guess-${rowId}-${column}`,
-        correctValue: row[column]
-      };
+      const key = `${rowId}-${colName}`;
+      const isVisible = tableCellsState[key];
 
-      // Set up options. We need 4 options total
-      // Draw wrong options from other elements in the database
-      let incorrectOptions = [];
-      MOLECULES_DATA.forEach(m => {
-        if (m.id === rowId || m.id === 'notes_oligo_macro' || m.id === 'antiacides_detail') return;
-        const val = m[column];
-        if (val && val !== '-') {
-          incorrectOptions.push(val);
+      if (isVisible) {
+        let contentHtml = '';
+        const val = rowData[colName];
+        if (Array.isArray(val)) {
+          contentHtml = `<ul class="list-disc pl-4 space-y-0.5">${val.map(x => `<li>${x}</li>`).join('')}</ul>`;
+        } else {
+          contentHtml = `<p>${val || '-'}</p>`;
         }
-      });
-
-      // Format unique clean string list
-      let finalOptions = [];
-      if (Array.isArray(row[column])) {
-        // Complex lists options: map to single line text representation
-        finalOptions.push(row[column].join(' '));
-        incorrectOptions.forEach(opt => {
-          if (Array.isArray(opt)) {
-            finalOptions.push(opt.join(' '));
-          } else {
-            finalOptions.push(opt);
-          }
-        });
-      } else {
-        finalOptions.push(row[column]);
-        incorrectOptions.forEach(opt => {
-          if (Array.isArray(opt)) {
-            finalOptions.push(opt[0]);
-          } else {
-            finalOptions.push(opt);
-          }
-        });
-      }
-
-      finalOptions = [...new Set(finalOptions)].filter(x => x && x !== '-');
-      // Shuffle and take 3 wrong ones
-      const correctString = Array.isArray(row[column]) ? row[column].join(' ') : row[column];
-      const filteredWrongs = finalOptions.filter(x => x !== correctString);
-      filteredWrongs.sort(() => 0.5 - Math.random());
-      
-      const optionChoices = filteredWrongs.slice(0, 3);
-      optionChoices.push(correctString);
-      optionChoices.sort(() => 0.5 - Math.random());
-
-      // Open Modal
-      document.getElementById('modal-prompt-desc').textContent = `${row.element} (${column})`;
-      document.getElementById('modal-title').textContent = `Compléter pour : ${row.element}`;
-      
-      const container = document.getElementById('modal-options');
-      container.innerHTML = '';
-
-      optionChoices.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = "w-full p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-left text-xs font-semibold text-slate-300 transition-colors block";
-        btn.textContent = opt;
-        btn.onclick = () => submitGuess(opt, correctString);
-        container.appendChild(btn);
-      });
-
-      document.getElementById('guess-modal').classList.remove('hidden');
-    }
-
-    function submitGuess(selectedText, correctText) {
-      document.getElementById('guess-modal').classList.add('hidden');
-      
-      const btn = document.getElementById(activeGuessCell.buttonId);
-      if (!btn) return;
-
-      const parentCell = btn.parentElement;
-      const isCorrect = (selectedText === correctText);
-
-      if (isCorrect) {
-        tgScore++;
-        // Replace cell with correct content and styled in green success
-        parentCell.innerHTML = `
-          <div class="p-2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            ${formatGuessOutput(activeGuessCell.correctValue)}
+        cell.className = "p-3 font-medium text-slate-300 bg-indigo-500/5 border-b border-slate-800/60 cursor-pointer hover:bg-slate-900/40 transition-all relative group";
+        cell.innerHTML = `
+          <div onclick="toggleCell('${rowId}', '${colName}')" class="pr-5 py-1 min-h-[50px] flex items-center">${contentHtml}</div>
+          <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 text-[9px]">
+            <i class="fa-solid fa-eye-slash" title="Cliquer pour masquer"></i>
           </div>
         `;
       } else {
-        // Wrong: replace cell with red error and correct text revealed
-        parentCell.innerHTML = `
-          <div class="p-2 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
-            <span class="block text-[9px] line-through text-slate-500">Erreur de choix</span>
-            ${formatGuessOutput(activeGuessCell.correctValue)}
+        cell.className = "p-3 border-b border-slate-800/60 cursor-pointer";
+        cell.innerHTML = `
+          <div onclick="toggleCell('${rowId}', '${colName}')" class="py-2 px-3 rounded-xl border border-dashed border-slate-800/80 bg-slate-950/45 hover:bg-slate-900/30 hover:border-slate-700 transition-all text-center text-slate-500/80 flex items-center justify-center gap-1.5 h-full min-h-[50px]">
+            <i class="fa-solid fa-eye-slash text-[10px]"></i>
+            <span class="text-[9px] font-bold tracking-wider uppercase">Révéler</span>
           </div>
         `;
       }
+    }
 
-      document.getElementById('tg-score-live').textContent = `${tgScore} / ${tgTotal}`;
+    function toggleCell(rowId, colName) {
+      const key = `${rowId}-${colName}`;
+      tableCellsState[key] = !tableCellsState[key];
+      renderCell(rowId, colName);
+    }
 
-      // Check if finished
-      const buttonsLeft = document.querySelectorAll(`button[id^="tg-guess-"]`);
-      if (buttonsLeft.length === 0) {
-        // Trigger completion congrats!
-        confetti({
-          particleCount: 150,
-          spread: 80
+    function toggleColumn(colName) {
+      const rowIds = tgActiveRows.map(r => r.id);
+      const anyHidden = rowIds.some(id => !tableCellsState[`${id}-${colName}`]);
+      
+      rowIds.forEach(id => {
+        tableCellsState[`${id}-${colName}`] = anyHidden;
+        renderCell(id, colName);
+      });
+    }
+
+    function toggleRow(rowId) {
+      const cols = ['dose', 'formes', 'mecanismes', 'indications', 'effets_indesirables'];
+      const anyHidden = cols.some(col => !tableCellsState[`${rowId}-${col}`]);
+
+      cols.forEach(col => {
+        tableCellsState[`${rowId}-${col}`] = anyHidden;
+        renderCell(rowId, col);
+      });
+    }
+
+    function showAllTableCells() {
+      tgActiveRows.forEach(row => {
+        const cols = ['dose', 'formes', 'mecanismes', 'indications', 'effets_indesirables'];
+        cols.forEach(col => {
+          tableCellsState[`${row.id}-${col}`] = true;
+          renderCell(row.id, col);
         });
-
-        // Set checklist checked
-        document.getElementById('check-table').checked = true;
-        updateChecklist();
-
-        alert(`Exercice terminé ! Score de réussite directe : ${tgScore} / ${tgTotal}`);
-      }
+      });
     }
 
-    function formatGuessOutput(val) {
-      if (Array.isArray(val)) {
-        return `<ul class="list-disc pl-4 space-y-0.5">${val.map(x => `<li>${x}</li>`).join('')}</ul>`;
-      }
-      return val || '-';
-    }
-
-    function closeGuessModal() {
-      document.getElementById('guess-modal').classList.add('hidden');
-    }
-
-    function quitTableGame() {
-      if (confirm("Voulez-vous quitter cet exercice en cours ?")) {
-        document.getElementById('tg-game').classList.add('hidden');
-        document.getElementById('tg-setup').classList.remove('hidden');
-      }
+    function hideAllTableCells() {
+      tgActiveRows.forEach(row => {
+        const cols = ['dose', 'formes', 'mecanismes', 'indications', 'effets_indesirables'];
+        cols.forEach(col => {
+          tableCellsState[`${row.id}-${col}`] = false;
+          renderCell(row.id, col);
+        });
+      });
     }
 
 
