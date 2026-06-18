@@ -193,7 +193,7 @@ const MOLECULES_DATA = [
     categorie: "Cation",
     sous_categorie: "Métaux de transition",
     dose: "80-100 mg",
-    formes: "PO : Gluconate, polysaccharate, sulfate | IV ou IM : Fer dextran ou oxyde de fer",
+    formes: "PO : Gluconate, polysaccharate, sulfate | IV : Saccharose, carboxymaltose, oxyde de fer en ampoules | IM : Fer dextran ou oxyde de fer",
     mecanismes: [
       "Incorporé sous forme de Fe2+ au sein de la porphyrine IX (couronne d'imidazole) pour former l'hémoglobine et la myoglobine.",
       "Intervient comme cofacteur redox au sein des porphyrines dans le transport et l'utilisation de l'oxygène."
@@ -215,6 +215,7 @@ const MOLECULES_DATA = [
       "Réactions d'oxydoréduction : Le fer libre est extrêmement toxique car il génère des radicaux libres destructeurs via la réaction de Fenton. C'est pourquoi il doit toujours être complexé pour son stockage et son transport.",
       "Répartition corporelle : 50-60 mg/kg de fer dans le corps (75% fonctionnel, 25% stocké dans les hépatocytes sous forme de Fe3+, 1% biodisponible fixé sur la transferrine).",
       "Le fer est recyclé par la rate et les macrophages (ainsi que les cellules de Kupffer du foie). Sa demi-vie moyenne est de 120 jours (durée de vie des globules rouges).",
+      "Utilisé par les globules rouges, la moelle épinière (noté ainsi dans le résumé de synthèse pour faire référence à la moelle osseuse) et les autres tissus.",
       "L'excrétion est très faible, le fer recyclé est fixé par la transferrine (qui fixe 2 atomes de Fe3+).",
       "Apport quotidien recommandé dans la synthèse : 1-2 g/jour (représente la quantité dans le bol alimentaire, sachant que seule une petite fraction est absorbée). Posologie thérapeutique : 100 mg/jour.",
       "Absorption : Le fer végétal (Fe3+) doit être réduit en Fe2+ par une ferriréductase intestinale avant d'être absorbé par le transporteur DMT1. Le fer héminique (animal) est absorbé directement."
@@ -374,7 +375,9 @@ const MOLECULES_DATA = [
     formes: "Sulfate, hydroxyde (algédrate), chlorure, sel d'hydroxyphosphate, aminoacétate, trisilicate d'aluminium",
     mecanismes: [
       "Provoque la constriction des pores de la peau (via le sulfate d'aluminium SO4), agissant comme astringent et anti-transpirant.",
-      "Neutralise l'acide gastrique (antiacide sous forme d'hydroxyde d'aluminium - algédrate)."
+      "Neutralise l'acide gastrique (antiacide sous forme d'hydroxyde d'aluminium - algédrate).",
+      "Le sulfate d'aluminium possède des propriétés déshydratantes et astringentes en usage externe.",
+      "Le chlorure d'aluminium possède également une action bactériostatique cutanée (Al3+)."
     ],
     indications: [
       "Astringent et hémostatique en usage externe (alun : resserre les pores, limite l'invasion bactérienne).",
@@ -482,18 +485,18 @@ const MOLECULES_DATA = [
     dose: "-",
     formes: "Talc | Trisilicate de magnésium | Silicate d'aluminium (Kaolin) | Bentonite | Attapulgite (Actapulgite) | Silicone (diméthicone, siméticone)",
     mecanismes: [
-      "Propriétés physiques de protection, de pouvoir desséchant et d'adsorption.",
+      "Propriétés physiques de protection, de pouvoir desséchant, de déshydratation et d'adsorption.",
       "Trisilicate de magnésium : soluble dans les acides dilués, agit comme antiacide gastrique et antimottant.",
-      "Kaolin (silicate d'aluminium) : adsorbe les toxines et l'eau dans le tube digestif (anti-diarrhéique et protecteur).",
-      "Attapulgite : structure en feuillets qui gonfle dans l'eau, formant un gel hautement adsorbant.",
+      "Kaolin (silicate d'aluminium) : adsorbe les toxines et l'eau dans le tube digestif (anti-diarrhéique, antiacide, déshydratant externe de transpiration, et protecteur local).",
+      "Attapulgite : viscosifiant puissant de structure en feuillets qui gonfle dans l'eau pour former des gels hautement adsorbants.",
       "Silicone : réduit la tension superficielle des bulles de gaz (antimousse) et agit comme lubrifiant physique."
     ],
     indications: [
       "Talc : talcage des fesses de bébé (pouvoir desséchant), lubrifiant galénique, talcage pleural (induction d'une symphyse pleurale en cas d'épanchement récidivant).",
       "Trisilicate de magnésium : antiacide.",
-      "Kaolin (silicate d'aluminium) : traitement symptomatique des diarrhées (adsorbant), antiacide, protecteur cutané en usage externe (pommades).",
+      "Kaolin (silicate d'aluminium) : traitement symptomatique des diarrhées (adsorbant puissant interne ou local), antiacide, déshydratant externe (transpiration), protecteur cutané et cicatrisant sous forme de pommade.",
       "Bentonite (argile naturelle) : adsorbant interne, agent émulsifiant et dispersant dans les cosmétiques.",
-      "Attapulgite (Actapulgite) : pansement digestif protecteur et anti-diarrhéique.",
+      "Attapulgite (Actapulgite) : pansement digestif protecteur, viscosifiant et anti-diarrhéique.",
       "Silicone (diméthicone, siméticone) : traitement du météorisme (ballonnements, sous forme d'antimousse), lubrifiant, et traitement anti-poux physique."
     ],
     effets_indesirables: [
@@ -740,7 +743,7 @@ const MOLECULES_DATA = [
     ],
     indications: [
       "Sélénide de sodium (Na2Se) : apport par perfusion IV en cas de déficience avérée en sélénium.",
-      "Sulfure de sélénium (SeS2) : shampoing dermatologique à action cytostatique (diminue le renouvellement des cellules épidermiques du cuir chevelu), utilisé contre la séborrhée, les pellicules, et le pityriasis versicolor (souvent associé au kétoconazole)."
+      "Sulfure de sélénium (SeS2) : shampoing dermatologique à action cytostatique (diminue le renouvellement des cellules épidermiques du cuir chevelu), utilisé contre la séborrhée, les pellicules, le pityriasis versicolor et comme adjuvant dans le traitement de la séborrhée du cuir chevelu associée à la levure Pityrosporum (souvent combiné avec du kétoconazole)."
     ],
     effets_indesirables: [
       "À forte dose, le sélénite de sodium (Na2SeO3) est hautement toxique pour les cellules.",
@@ -749,7 +752,7 @@ const MOLECULES_DATA = [
     details_synthese: [
       "Degrés d'oxydation : -2, 0, 4, 6.",
       "Se trouve naturellement dans les plantes, les viandes et les œufs.",
-      "La forme majoritairement présente dans les suppléments IV is le Na2SeO3 (degré d'oxydation IV) qui est ensuite réduit dans l'organisme en sélénide (-2) pour être incorporé dans les sélénoprotéines."
+      "La forme majoritairement présente dans les suppléments IV est le Na2SeO3 (degré d'oxydation IV) qui est ensuite réduit dans l'organisme en sélénide (-2) pour être incorporé dans les sélénoprotéines."
     ]
   },
   {
@@ -771,12 +774,13 @@ const MOLECULES_DATA = [
     effets_indesirables: [
       "Fluorose : surdosage chronique en fluor durant la formation des dents, caractérisé par l'apparition de taches blanches ou brunes inesthétiques sur l'émail, accompagnées de troubles gastro-intestinaux (TGI), nausées, vomissements et céphalées.",
       "Hautement volatil et toxique sous forme de gaz fluorhydrique (H2F2) en milieu acide.",
-      "Une AMM (Autorisation de Mise sur le Marché) est requise pour les dentifrices dont la concentration dépasse 1500 ppm."
+      "Une AMM (Autorisation de Mise sur le Market) est requise pour les dentifrices dont la concentration dépasse 1500 ppm."
     ],
     details_synthese: [
       "N'existe dans l'organisme que sous forme d'anion (F-).",
       "Bloque la position d'oxydation en chimie organique : l'introduction de fluor sur un cycle aromatique empêche l'hydroxylation métabolique de désactivation.",
-      "Présent principalement sous forme de sel minéral NaF. Non indispensable à la vie."
+      "Présent principalement sous forme de sel minéral NaF. Non indispensable à la vie.",
+      "Dosages spécifiques : 1g de gel contient 12,5 mg de Fluor (soit 1,25%). Les comprimés sont dosés à 0,5 mg de NaF (soit 0,25 mg de Fluorure F-)."
     ]
   },
   {
@@ -926,7 +930,8 @@ const MOLECULES_DATA = [
       "Risque d'hypokaliémie en cas de surdosage."
     ],
     details_synthese: [
-      "Les microbilles de polystyrène traversent le tube digestif sans jamais être absorbées."
+      "Les microbilles de polystyrène traversent le tube digestif sans jamais être absorbées.",
+      "Note d'examen : Dans le tableau d'examen, ces résines (polystyrène sulfonate) sont appelées 'résines de sulfate' par simplification ou erreur de dénomination."
     ]
   },
   {
